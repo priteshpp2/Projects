@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Streak App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #ffecd2; --bg2: #fcb69f; --bg3: #a18cd1; --bg4: #84fab0;
+    --ink: #2d2a4a; --muted: #6b6890; --card: rgba(255,255,255,0.92);
+    --shadow: 0 10px 30px rgba(45,42,74,0.12);
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: 'Nunito', system-ui, sans-serif; color: var(--ink);
+    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb, #84fab0, #8fd3f4);
+    background-size: 400% 400%; animation: bgShift 22s ease infinite;
+  }
+  @keyframes bgShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: block; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 18px 80px; }
+
+  /* ---------- buttons ---------- */
+  button { font-family: inherit; cursor: pointer; border: none; }
+  .btn {
+    padding: 12px 22px; border-radius: 999px; font-weight: 800; font-size: 15px;
+    background: #fff; color: var(--ink); box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(45,42,74,0.18); }
+  .btn:active { transform: scale(.97); }
+  .btn.primary { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; }
+  .btn.ghost { background: rgba(255,255,255,0.55); }
+  .btn.small { padding: 8px 14px; font-size: 13px; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  /* ---------- welcome ---------- */
+  .welcome { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .welcome-card {
+    width: 100%; max-width: 520px; background: var(--card); border-radius: 30px; padding: 40px 34px;
+    box-shadow: 0 30px 60px rgba(45,42,74,0.2); text-align: center; animation: pop .5s cubic-bezier(.2,1.4,.4,1);
+  }
+  .logo { font-size: 64px; line-height: 1; animation: flame 1.6s ease-in-out infinite; display: inline-block; }
+  @keyframes flame { 0%,100%{transform:scale(1) rotate(-3deg)} 50%{transform:scale(1.12) rotate(3deg)} }
+  h1 { font-size: 38px; margin: 10px 0 4px; font-weight: 900; background: linear-gradient(90deg,#6c5ce7,#fd79a8,#fdcb6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); margin: 0 0 24px; font-weight: 700; }
+  .user-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 22px; }
+  .chip {
+    padding: 10px 18px; border-radius: 999px; font-weight: 800; color: #fff; font-size: 15px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.12); transition: transform .15s; display: flex; align-items: center; gap: 8px;
+  }
+  .chip:hover { transform: translateY(-3px) scale(1.04); }
+  .chip .avatar { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.3); display: grid; place-items: center; font-size: 13px; }
+  .new-user { display: flex; gap: 10px; }
+  .new-user input {
+    flex: 1; padding: 14px 18px; border-radius: 999px; border: 2px solid #e6e3ff; font-family: inherit; font-size: 16px; font-weight: 700; outline: none; transition: border .2s;
+  }
+  .new-user input:focus { border-color: #6c5ce7; }
+  .empty-hint { color: var(--muted); font-size: 14px; font-weight: 700; }
+
+  /* ---------- dashboard header ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .topbar .who { display: flex; align-items: center; gap: 12px; }
+  .topbar .avatar-lg { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 20px; box-shadow: var(--shadow); }
+  .topbar h2 { margin: 0; font-size: 22px; font-weight: 900; }
+  .topbar .date { font-size: 13px; color: var(--ink); opacity: .75; font-weight: 700; }
+  .topbar .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .hero {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px 26px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 24px; align-items: center; margin-bottom: 26px;
+  }
+  .hero .msg h3 { margin: 0 0 6px; font-size: 24px; font-weight: 900; }
+  .hero .msg p { margin: 0; color: var(--muted); font-weight: 700; font-size: 15px; }
+  .hero .complete-all {
+    padding: 18px 28px; border-radius: 20px; font-size: 17px; font-weight: 900; color: #fff;
+    background: linear-gradient(135deg, #00b894, #55efc4); box-shadow: 0 12px 30px rgba(0,184,148,.35);
+    display: flex; align-items: center; gap: 10px; transition: transform .15s;
+  }
+  .hero .complete-all:hover { transform: translateY(-3px) scale(1.02); }
+  .hero .complete-all.done { background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 12px 30px rgba(108,92,231,.35); }
+
+  /* ---------- rings ---------- */
+  .ring { position: relative; display: grid; place-items: center; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+  .ring .track { stroke: rgba(0,0,0,.07); }
+  .ring .bar { transition: stroke-dashoffset .8s cubic-bezier(.2,1,.3,1); }
+  .ring .label { position: absolute; text-align: center; line-height: 1.05; }
+  .ring .label b { display: block; font-size: 26px; font-weight: 900; }
+  .ring .label span { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ---------- habit grid ---------- */
+  .section-title { display: flex; align-items: center; justify-content: space-between; margin: 0 0 14px; }
+  .section-title h3 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+
+  .habit {
+    position: relative; overflow: hidden; border-radius: var(--radius); padding: 20px 20px 18px; color: #fff;
+    box-shadow: 0 14px 34px rgba(0,0,0,.15); animation: pop .45s cubic-bezier(.2,1.4,.4,1) both;
+    transition: transform .2s;
+  }
+  .habit:hover { transform: translateY(-4px); }
+  .habit::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 90% -10%, rgba(255,255,255,.35), transparent 50%); pointer-events: none; }
+  .habit.done { outline: 3px solid rgba(255,255,255,.75); outline-offset: -3px; }
+  .habit .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .habit .name { font-size: 20px; font-weight: 900; margin: 0; line-height: 1.2; word-break: break-word; }
+  .habit .del { background: rgba(255,255,255,.2); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 15px; opacity: .7; transition: opacity .2s, background .2s; flex-shrink: 0; }
+  .habit .del:hover { opacity: 1; background: rgba(0,0,0,.25); }
+  .habit .body { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+  .habit .ring .track { stroke: rgba(255,255,255,.25); }
+  .habit .ring .bar { stroke: #fff; filter: drop-shadow(0 0 6px rgba(255,255,255,.6)); }
+  .habit .ring .label span { color: rgba(255,255,255,.85); }
+  .habit .stats { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .habit .stat { background: rgba(255,255,255,.18); border-radius: 14px; padding: 8px 10px; }
+  .habit .stat b { display: block; font-size: 20px; font-weight: 900; }
+  .habit .stat span { font-size: 11px; font-weight: 800; opacity: .9; text-transform: uppercase; letter-spacing: .4px; }
+  .habit .next { font-size: 12px; font-weight: 800; opacity: .9; margin-top: 10px; }
+
+  .week { display: flex; gap: 6px; margin-top: 12px; }
+  .week .day { flex: 1; text-align: center; font-size: 10px; font-weight: 800; opacity: .9; }
+  .week .dot { width: 100%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.25); margin: 0 auto 3px; border: 2px solid transparent; display: grid; place-items: center; font-size: 11px; }
+  .week .dot.on { background: #fff; color: #2d2a4a; }
+  .week .dot.today { border-color: #fff; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; min-height: 26px; }
+  .badge {
+    width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 900;
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e); color: #6d4c00; box-shadow: 0 3px 10px rgba(0,0,0,.2); position: relative;
+    cursor: default;
+  }
+  .badge.locked { background: rgba(255,255,255,.18); color: rgba(255,255,255,.55); box-shadow: none; }
+  .badge.new { animation: badgeIn .9s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes badgeIn { 0%{transform:scale(0) rotate(-180deg)} 60%{transform:scale(1.4) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+
+  .check {
+    margin-top: 16px; width: 100%; padding: 14px; border-radius: 16px; font-size: 16px; font-weight: 900;
+    background: #fff; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: transform .15s, background .25s; box-shadow: 0 8px 20px rgba(0,0,0,.15);
+  }
+  .check:hover { transform: translateY(-2px); }
+  .check:active { transform: scale(.96); }
+  .check.done { background: rgba(255,255,255,.22); color: #fff; box-shadow: none; }
+  .check .ico { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; border: 2.5px solid currentColor; font-size: 14px; }
+  .check.done .ico { background: #fff; color: #00b894; border-color: #fff; }
+  .habit.celebrate { animation: celebrate .6s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes celebrate { 0%{transform:scale(1)} 40%{transform:scale(1.05) rotate(-1deg)} 70%{transform:scale(.98) rotate(1deg)} 100%{transform:scale(1)} }
+
+  /* ---------- add habit ---------- */
+  .add-card {
+    border-radius: var(--radius); padding: 20px; background: rgba(255,255,255,.55); border: 3px dashed rgba(255,255,255,.9);
+    display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 200px; backdrop-filter: blur(6px);
+  }
+  .add-card h4 { margin: 0; font-size: 18px; font-weight: 900; }
+  .add-card input { padding: 13px 16px; border-radius: 14px; border: 2px solid #fff; font-family: inherit; font-size: 15px; font-weight: 700; outline: none; background: #fff; }
+  .add-card input:focus { border-color: #6c5ce7; }
+  .suggest { display: flex; flex-wrap: wrap; gap: 6px; }
+  .suggest button { background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 800; color: var(--muted); }
+  .suggest button:hover { color: #6c5ce7; }
+
+  /* ---------- toast / modal ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(120px); background: #2d2a4a; color: #fff;
+    padding: 12px 20px; border-radius: 999px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,.25); transition: transform .35s cubic-bezier(.2,1.4,.4,1); z-index: 50; max-width: 90vw; text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #d63031; }
+  .toast.success { background: #00b894; }
+
+  .modal { position: fixed; inset: 0; background: rgba(45,42,74,.55); display: none; place-items: center; z-index: 40; backdrop-filter: blur(4px); }
+  .modal.show { display: grid; }
+  .modal-card {
+    background: #fff; border-radius: 30px; padding: 36px 32px; text-align: center; max-width: 420px; width: 90%;
+    animation: pop .5s cubic-bezier(.2,1.6,.4,1); box-shadow: 0 30px 80px rgba(0,0,0,.35);
+  }
+  .modal-card .big-badge {
+    width: 120px; height: 120px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; font-size: 34px; font-weight: 900; color: #6d4c00;
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e, #f9ca24); box-shadow: 0 12px 40px rgba(253,203,110,.7); animation: spinIn 1s cubic-bezier(.2,1.6,.4,1), glow 1.6s ease-in-out infinite 1s;
+  }
+  @keyframes spinIn { 0%{transform:scale(0) rotate(-360deg)} 100%{transform:scale(1) rotate(0)} }
+  @keyframes glow { 0%,100%{box-shadow:0 12px 40px rgba(253,203,110,.7)} 50%{box-shadow:0 12px 60px rgba(253,203,110,1)} }
+  .modal-card h3 { margin: 0 0 6px; font-size: 26px; font-weight: 900; }
+  .modal-card p { margin: 0 0 20px; color: var(--muted); font-weight: 700; }
+
+  @keyframes pop { 0%{opacity:0; transform:scale(.85) translateY(10px)} 100%{opacity:1; transform:scale(1) translateY(0)} }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+
+  .empty { text-align: center; color: #fff; font-weight: 800; padding: 40px 20px; font-size: 18px; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
+
+  @media (max-width: 720px) {
+    .hero { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .topbar .actions { width: 100%; justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ WELCOME ============ -->
+<section id="welcome" class="screen active">
+  <div class="welcome">
+    <div class="welcome-card">
+      <div class="logo">🔥</div>
+      <h1>Streak App</h1>
+      <p class="sub">Small steps, every day. Who's checking in?</p>
+      <div id="userChips" class="user-chips"></div>
+      <form id="newUserForm" class="new-user" autocomplete="off">
+        <input id="newUserInput" placeholder="Enter your name to start…" maxlength="31" required>
+        <button class="btn primary" type="submit">Go →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section id="dashboard" class="screen">
+  <div class="container">
+    <div class="topbar">
+      <div class="who">
+        <div id="avatar" class="avatar-lg">?</div>
+        <div>
+          <h2 id="userName">User</h2>
+          <div id="todayLabel" class="date"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn ghost small" id="refreshBtn" title="Re-read the Excel file">⟳ Refresh</button>
+        <a class="btn ghost small" href="/api/export" style="text-decoration:none">⬇ Excel</a>
+        <button class="btn ghost small" id="importBtn" title="Upload an edited streaks.xlsx (replaces all data)">⬆ Upload Excel</button>
+        <input type="file" id="importFile" accept=".xlsx" hidden>
+        <button class="btn ghost small" id="switchBtn">👤 Switch user</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="ring" id="todayRing"></div>
+      <div class="msg">
+        <h3 id="greeting">Hello!</h3>
+        <p id="motivation">Let's make today count.</p>
+      </div>
+      <button class="complete-all" id="completeAll">✨ Complete all for today</button>
+    </div>
+
+    <div class="section-title">
+      <h3 id="habitCount">Your habits</h3>
+    </div>
+    <div id="grid" class="grid"></div>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<div id="modal" class="modal">
+  <div class="modal-card">
+    <div class="big-badge" id="modalBadge">7</div>
+    <h3 id="modalTitle">Milestone unlocked!</h3>
+    <p id="modalText"></p>
+    <button class="btn primary" id="modalClose">Keep going 🚀</button>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+// ============================================================
+//  State & helpers
+// ============================================================
+const PALETTES = [
+  ['#ff6b6b', '#ee5a24'], ['#6c5ce7', '#a29bfe'], ['#00b894', '#55efc4'], ['#0984e3', '#74b9ff'],
+  ['#e84393', '#fd79a8'], ['#fdcb6e', '#e17055'], ['#00cec9', '#81ecec'], ['#d63031', '#ff7675'],
+  ['#2d3436', '#636e72'], ['#6ab04c', '#badc58'], ['#be2edd', '#e056fd'], ['#f0932b', '#ffbe76'],
+];
+const MOTIVATION = {
+  zero: ['Every streak starts with day one. Let\'s go!', 'Today is a perfect day to begin.', 'You don\'t have to be great to start — just start.'],
+  partial: ['Nice progress! Keep the momentum going.', 'You\'re on your way — finish strong!', 'Halfway heroes still become legends.'],
+  all: ['All done! You absolutely crushed today. 🎉', 'Perfect day! Your future self is grateful.', 'Streaks protected. Legend status: confirmed.'],
+  none: ['Add your first habit below and begin your streak!', 'What do you want to become consistent at?'],
+};
+const BADGE_NAMES = { 1: 'First Step', 3: 'Getting Going', 7: 'One Week', 14: 'Two Weeks', 30: 'One Month', 50: 'Fifty Club', 75: 'Seventy-Five', 100: 'Century', 150: 'Unstoppable', 200: 'Two Hundred', 250: 'Iron Will', 300: 'Three Hundred', 365: 'Full Year' };
+const SUGGESTIONS = ['🏃 Exercise', '🌅 Wake up early', '📖 Read 10 pages', '💧 Drink 2L water', '🧘 Meditate', '✍️ Journal', '🚭 No junk food', '😴 Sleep by 11'];
+
+let currentUser = localStorage.getItem('streak.user') || null;
+let state = null;
+let pollTimer = null;
+
+const $ = s => document.querySelector(s);
+const hashColor = name => PALETTES[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTES.length];
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const TZ = -new Date().getTimezoneOffset(); // minutes ahead of UTC (IST = 330)
+async function api(url, opts = {}) {
+  url += (url.includes('?') ? '&' : '?') + 'tz=' + TZ;
+  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+let toastTimer;
+function toast(msg, type = '') {
+  const t = $('#toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function ringHTML(size, pct, stroke, labelBig, labelSmall) {
+  const r = (size - 12) / 2, c = 2 * Math.PI * r;
+  const off = c * (1 - Math.max(0, Math.min(1, pct)));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}"></circle>
+    <circle class="bar" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="${stroke}" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-off="${off}"></circle>
+  </svg><div class="label"><b>${labelBig}</b><span>${labelSmall}</span></div>`;
+}
+function animateRings(root) {
+  requestAnimationFrame(() => root.querySelectorAll('.bar').forEach(b => (b.style.strokeDashoffset = b.dataset.off)));
+}
+function fmtDate(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+// ============================================================
+//  Welcome screen
+// ============================================================
+async function showWelcome() {
+  stopPolling();
+  $('#dashboard').classList.remove('active');
+  $('#welcome').classList.add('active');
+  const chips = $('#userChips');
+  chips.innerHTML = '';
+  try {
+    const { users } = await api('/api/users');
+    if (!users.length) chips.innerHTML = '<div class="empty-hint">No users yet — type a name below to create your space.</div>';
+    users.forEach(u => {
+      const [c1, c2] = hashColor(u);
+      const b = document.createElement('button');
+      b.className = 'chip'; b.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+      b.innerHTML = `<span class="avatar">${esc(u[0].toUpperCase())}</span>${esc(u)}`;
+      b.onclick = () => openUser(u);
+      chips.appendChild(b);
+    });
+  } catch (e) { toast(e.message, 'error'); }
+  $('#newUserInput').focus();
+}
+
+$('#newUserForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = $('#newUserInput').value.trim();
+  if (!name) return;
+  try {
+    const { username } = await api('/api/users', { method: 'POST', body: JSON.stringify({ username: name }) });
+    $('#newUserInput').value = '';
+    openUser(username);
+  } catch (err) { toast(err.message, 'error'); }
+});
+
+// ============================================================
+//  Dashboard
+// ============================================================
+async function openUser(name) {
+  currentUser = name;
+  localStorage.setItem('streak.user', name);
+  $('#welcome').classList.remove('active');
+  $('#dashboard').classList.add('active');
+  await load();
+  startPolling();
+}
+
+async function load(silent = false) {
+  try {
+    const data = await api(`/api/users/${encodeURIComponent(currentUser)}`);
+    const changed = JSON.stringify(data) !== JSON.stringify(state);
+    state = data;
+    if (changed) render();
+  } catch (e) {
+    if (!silent) toast(e.message, 'error');
+    if (/not found/i.test(e.message)) showWelcome();
+  }
+}
+
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(() => load(true), 5000);
+}
+function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
+document.addEventListener('visibilitychange', () => { if (!document.hidden && currentUser && state) load(true); });
+
+function render() {
+  const { username, today, habits, milestones } = state;
+  const [c1, c2] = hashColor(username);
+  $('#avatar').textContent = username[0].toUpperCase();
+  $('#avatar').style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+  $('#userName').textContent = username;
+  $('#todayLabel').textContent = fmtDate(today);
+
+  const total = habits.length, done = habits.filter(h => h.doneToday).length;
+  $('#todayRing').innerHTML = ringHTML(120, total ? done / total : 0, 'url(#g)', `${done}/${total}`, 'today');
+  $('#todayRing svg').insertAdjacentHTML('afterbegin', `<defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#00b894"/></linearGradient></defs>`);
+
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  $('#greeting').textContent = `${greet}, ${username}!`;
+  $('#motivation').textContent = !total ? pick(MOTIVATION.none) : done === 0 ? pick(MOTIVATION.zero) : done < total ? pick(MOTIVATION.partial) : pick(MOTIVATION.all);
+
+  const allBtn = $('#completeAll');
+  allBtn.disabled = !total;
+  allBtn.classList.toggle('done', total > 0 && done === total);
+  allBtn.innerHTML = total && done === total ? '🏆 All done for today!' : `✨ Complete all for today${total ? ` (${total - done} left)` : ''}`;
+
+  $('#habitCount').textContent = total ? `Your habits · ${total}` : 'Your habits';
+
+  const grid = $('#grid');
+  grid.innerHTML = habits.map((h, i) => habitCard(h, i, today, milestones)).join('') + addCard();
+  animateRings(grid);
+  bindCards();
+}
+
+function habitCard(h, i, today, milestones) {
+  const [c1, c2] = PALETTES[i % PALETTES.length];
+  const span = (h.nextMilestone || h.currentStreak) - h.prevMilestone;
+  const pct = h.nextMilestone ? (h.currentStreak - h.prevMilestone) / span : 1;
+  const week = h.history.slice(-7).map(d => {
+    const dt = new Date(...d.date.split('-').map((v, k) => k === 1 ? v - 1 : +v));
+    return `<div class="day"><div class="dot ${d.done ? 'on' : ''} ${d.date === today ? 'today' : ''}">${d.done ? '✓' : ''}</div>${'SMTWTFS'[dt.getDay()]}</div>`;
+  }).join('');
+  const badges = milestones.map(m => `<div class="badge ${h.badges.includes(m) ? '' : 'locked'}" title="${m}-day streak · ${BADGE_NAMES[m]}">${m}</div>`).join('');
+  return `
+  <div class="habit ${h.doneToday ? 'done' : ''}" data-id="${h.id}" style="background: linear-gradient(135deg, ${c1}, ${c2}); animation-delay:${i * 50}ms">
+    <div class="head">
+      <h4 class="name">${esc(h.name)}</h4>
+      <button class="del" data-del="${h.id}" title="Delete habit">✕</button>
+    </div>
+    <div class="body">
+      <div class="ring">${ringHTML(96, pct, '#fff', h.currentStreak, h.currentStreak === 1 ? 'day' : 'days')}</div>
+      <div class="stats">
+        <div class="stat"><b>${h.currentStreak}</b><span>🔥 Current</span></div>
+        <div class="stat"><b>${h.longestStreak}</b><span>🏆 Longest</span></div>
+        <div class="stat" style="grid-column: 1 / -1"><b>${h.totalCompletions}</b><span>✅ Total days</span></div>
+      </div>
+    </div>
+    <div class="next">${h.nextMilestone ? `${h.nextMilestone - h.currentStreak} more day${h.nextMilestone - h.currentStreak === 1 ? '' : 's'} to the ${h.nextMilestone}-day badge` : '👑 You\'ve earned every badge!'}</div>
+    <div class="week">${week}</div>
+    <div class="badges">${badges}</div>
+    <button class="check ${h.doneToday ? 'done' : ''}" data-toggle="${h.id}">
+      <span class="ico">${h.doneToday ? '✓' : ''}</span>${h.doneToday ? 'Completed today' : 'Mark as done'}
+    </button>
+  </div>`;
+}
+
+function addCard() {
+  return `
+  <div class="add-card">
+    <h4>➕ Add a new habit</h4>
+    <form id="addForm" autocomplete="off" style="display:flex;gap:8px">
+      <input id="addInput" placeholder="e.g. 🏃 Exercise" maxlength="60" required style="flex:1">
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+    <div class="suggest">${SUGGESTIONS.map(s => `<button type="button" data-suggest="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+  </div>`;
+}
+
+function bindCards() {
+  document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.toggle, b));
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteHabit(+b.dataset.del));
+  document.querySelectorAll('[data-suggest]').forEach(b => b.onclick = () => { $('#addInput').value = b.dataset.suggest; $('#addInput').focus(); });
+  $('#addForm').onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#addInput').value.trim();
+    if (!name) return;
+    try {
+      state = await api(`/api/users/${encodeURIComponent(currentUser)}/habits`, { method: 'POST', body: JSON.stringify({ name }) });
+      render();
+      toast(`Added "${name}" — day one starts now!`, 'success');
+    } catch (err) { toast(err.message, 'error'); }
+  };
+}
+
+async function toggleHabit(id, btn) {
+  const card = btn.closest('.habit');
+  const wasDone = state.habits[id].doneToday;
+  btn.disabled = true;
+  try {
+    const data = await api(`/api/users/${encodeURIComponent(currentUser)}/habits/${id}/toggle`, { method: 'POST', body: JSON.stringify({}) });
+    const { changed, ...view } = data;
+    state = view;
+    render();
+    const newCard = document.querySelector(`.habit[data-id="${id}"]`);
+    if (!wasDone) {
+      newCard.classList.add('celebrate');
+      burst(newCard, 24);
+      const h = state.habits[id];
+      if (changed.newBadges.length) {
+        changed.newBadges.forEach(m => { const el = [...newCard.querySelectorAll('.badge')].find(b => b.textContent == m); if (el) el.classList.add('new'); });
+        celebrate(h.name, Math.max(...changed.newBadges));
+      } else {
+        toast(`🔥 ${h.name}: ${h.currentStreak}-day streak!`, 'success');
+      }
+    } else {
+      toast('Unmarked for today');
+    }
+  } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
+}
+
+async function deleteHabit(id) {
+  const h = state.habits[id];
+  if (!confirm(`Delete "${h.name}" and all its history?`)) return;
+  try {
+    state = await api(`/api/users/${encodeURIComponent(currentUser)}/habits/${id}`, { method: 'DELETE' });
+    render();
+    toast(`Deleted "${h.name}"`);
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+$('#completeAll').onclick = async () => {
+  const btn = $('#completeAll');
+  btn.disabled = true;
+  try {
+    const { newBadges, ...view } = await api(`/api/users/${encodeURIComponent(currentUser)}/complete-all`, { method: 'POST', body: JSON.stringify({}) });
+    state = view;
+    render();
+    document.querySelectorAll('.habit').forEach((c, i) => setTimeout(() => { c.classList.add('celebrate'); burst(c, 14); }, i * 80));
+    if (newBadges.length) {
+      const top = newBadges.reduce((a, b) => (b.badge > a.badge ? b : a));
+      newBadges.forEach(({ id, badge }) => { const el = [...document.querySelectorAll(`.habit[data-id="${id}"] .badge`)].find(b => b.textContent == badge); if (el) el.classList.add('new'); });
+      celebrate(newBadges.length > 1 ? `${newBadges.length} habits` : top.name, top.badge, newBadges.length > 1);
+    } else {
+      toast('🏆 Perfect day! Every habit completed.', 'success');
+      confettiRain(120);
+    }
+  } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
+};
+
+$('#refreshBtn').onclick = async () => { await load(); toast('Refreshed from Excel'); };
+$('#importBtn').onclick = () => $('#importFile').click();
+$('#importFile').onchange = async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  if (!confirm(`Replace ALL data with "${file.name}"?`)) return;
+  try {
+    const res = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: file });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    toast(`Imported ${data.users.length} user sheet(s)`, 'success');
+    if (data.users.includes(currentUser)) await load(); else showWelcome();
+  } catch (err) { toast(err.message, 'error'); }
+};
+$('#switchBtn').onclick = () => { localStorage.removeItem('streak.user'); currentUser = null; state = null; showWelcome(); };
+
+// ============================================================
+//  Celebration: modal + confetti
+// ============================================================
+function celebrate(name, badge, multi = false) {
+  $('#modalBadge').textContent = badge;
+  $('#modalTitle').textContent = `${BADGE_NAMES[badge] || badge + ' days'}!`;
+  $('#modalText').textContent = multi
+    ? `${name} just hit new milestones — biggest one: ${badge}-day streak!`
+    : `"${name}" reached a ${badge}-day streak. That's real consistency!`;
+  $('#modal').classList.add('show');
+  confettiRain(220);
+}
+$('#modalClose').onclick = () => $('#modal').classList.remove('show');
+$('#modal').onclick = e => { if (e.target === $('#modal')) $('#modal').classList.remove('show'); };
+
+const canvas = $('#confetti'), ctx = canvas.getContext('2d');
+let particles = [], raf = null;
+function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+addEventListener('resize', resize); resize();
+const COLORS = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#5f27cd', '#ff9ff3', '#ffffff'];
+function spawn(x, y, n, spread) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = 2 + Math.random() * spread;
+    particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 3, g: .12 + Math.random() * .1, life: 60 + Math.random() * 40, size: 4 + Math.random() * 5, color: pick(COLORS), rot: Math.random() * 6, vr: (Math.random() - .5) * .3 });
+  }
+  if (!raf) tick();
+}
+function burst(el, n) { const r = el.getBoundingClientRect(); spawn(r.left + r.width / 2, r.top + r.height / 2, n, 6); }
+function confettiRain(n) { for (let i = 0; i < n; i++) spawn(Math.random() * innerWidth, -10 - Math.random() * 100, 1, 3); }
+function tick() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.life > 0 && p.y < canvas.height + 20);
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.vy += p.g; p.vx *= .99; p.rot += p.vr; p.life--;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.globalAlpha = Math.min(1, p.life / 30);
+    ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * .6); ctx.restore();
+  }
+  raf = particles.length ? requestAnimationFrame(tick) : null;
+}
+
+// ============================================================
+//  Boot
+// ============================================================
+(async () => {
+  if (currentUser) {
+    try { await api(`/api/users/${encodeURIComponent(currentUser)}`); return openUser(currentUser); } catch { /* fall through */ }
+  }
+  showWelcome();
+})();
+</script>
+</body>
+</html>
