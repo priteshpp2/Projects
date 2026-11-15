@@ -385,7 +385,7 @@ async function load(silent = false) {
 
 function startPolling() {
   stopPolling();
-  pollTimer = setInterval(() => load(true), 5000);
+  pollTimer = setInterval(() => load(true), 30000);
 }
 function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && currentUser && state) load(true); });
