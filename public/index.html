@@ -56,12 +56,31 @@
   }
   .chip:hover { transform: translateY(-3px) scale(1.04); }
   .chip .avatar { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.3); display: grid; place-items: center; font-size: 13px; }
-  .new-user { display: flex; gap: 10px; }
-  .new-user input {
-    flex: 1; padding: 14px 18px; border-radius: 999px; border: 2px solid #e6e3ff; font-family: inherit; font-size: 16px; font-weight: 700; outline: none; transition: border .2s;
+  .chip.selected { outline: 3px solid #fff; outline-offset: 2px; transform: scale(1.06); }
+  .auth-form { display: flex; flex-direction: column; gap: 10px; }
+  .auth-form input {
+    width: 100%; padding: 14px 18px; border-radius: 999px; border: 2px solid #e6e3ff; font-family: inherit; font-size: 16px; font-weight: 700; outline: none; transition: border .2s;
   }
-  .new-user input:focus { border-color: #6c5ce7; }
+  .auth-form input:focus { border-color: #6c5ce7; }
+  .auth-form .btn { width: 100%; padding: 14px; font-size: 16px; }
+  .auth-switch { margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .auth-switch a { color: #6c5ce7; cursor: pointer; text-decoration: underline; }
   .empty-hint { color: var(--muted); font-size: 14px; font-weight: 700; }
+
+  .user-select {
+    padding: 8px 14px; border-radius: 999px; border: none; font-family: inherit; font-weight: 800; font-size: 13px;
+    background: rgba(255,255,255,0.55); color: var(--ink); box-shadow: var(--shadow); cursor: pointer; outline: none;
+  }
+  .admin-tag { font-size: 11px; font-weight: 900; background: linear-gradient(135deg,#fdcb6e,#e17055); color: #fff; border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; }
+
+  .modal-card.form { text-align: left; }
+  .modal-card.form h3 { text-align: center; }
+  .modal-card.form input { width: 100%; padding: 13px 16px; border-radius: 14px; border: 2px solid #e6e3ff; font-family: inherit; font-size: 15px; font-weight: 700; outline: none; margin-bottom: 10px; }
+  .modal-card.form input:focus { border-color: #6c5ce7; }
+  .modal-card.form .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+  .footer { text-align: center; padding: 18px; color: #fff; font-weight: 800; font-size: 13px; text-shadow: 0 2px 8px rgba(0,0,0,.2); opacity: .9; }
+  .footer b { font-weight: 900; }
 
   /* ---------- dashboard header ---------- */
   .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -206,14 +225,18 @@
     <div class="welcome-card">
       <div class="logo">🔥</div>
       <h1>Streak App</h1>
-      <p class="sub">Small steps, every day. Who's checking in?</p>
+      <p class="sub" id="authSub">Small steps, every day. Who's checking in?</p>
       <div id="userChips" class="user-chips"></div>
-      <form id="newUserForm" class="new-user" autocomplete="off">
-        <input id="newUserInput" placeholder="Enter your name to start…" maxlength="31" required>
-        <button class="btn primary" type="submit">Go →</button>
+      <form id="authForm" class="auth-form" autocomplete="off">
+        <input id="authUser" placeholder="Your name" maxlength="31" required autocomplete="username">
+        <input id="authPass" type="password" placeholder="Password" required autocomplete="current-password">
+        <input id="authPass2" type="password" placeholder="Confirm password" autocomplete="new-password" hidden>
+        <button class="btn primary" type="submit" id="authSubmit">Log in →</button>
       </form>
+      <div class="auth-switch" id="authSwitch">New here? <a id="authToggle">Create an account</a></div>
     </div>
   </div>
+  <div class="footer" style="position:fixed;bottom:0;left:0;right:0">Creator: <b>Pritesh Pawar</b></div>
 </section>
 
 <!-- ============ DASHBOARD ============ -->
@@ -228,11 +251,13 @@
         </div>
       </div>
       <div class="actions">
-        <button class="btn ghost small" id="refreshBtn" title="Re-read the Excel file">⟳ Refresh</button>
-        <a class="btn ghost small" href="/api/export" style="text-decoration:none">⬇ Excel</a>
-        <button class="btn ghost small" id="importBtn" title="Upload an edited streaks.xlsx (replaces all data)">⬆ Upload Excel</button>
+        <select class="user-select" id="userSelect" title="View another user's streaks (admin)" hidden></select>
+        <button class="btn ghost small" id="refreshBtn" title="Reload latest data">⟳ Refresh</button>
+        <button class="btn ghost small" id="exportBtn" data-admin hidden title="Download the Excel workbook">⬇ Excel</button>
+        <button class="btn ghost small" id="importBtn" data-admin hidden title="Upload an edited streaks.xlsx (replaces all data)">⬆ Upload Excel</button>
         <input type="file" id="importFile" accept=".xlsx" hidden>
-        <button class="btn ghost small" id="switchBtn">👤 Switch user</button>
+        <button class="btn ghost small" id="pwBtn">🔑 Change password</button>
+        <button class="btn ghost small" id="logoutBtn">⏻ Log out</button>
       </div>
     </div>
 
@@ -250,6 +275,7 @@
     </div>
     <div id="grid" class="grid"></div>
   </div>
+  <div class="footer">Creator: <b>Pritesh Pawar</b></div>
 </section>
 
 <div id="toast" class="toast"></div>
@@ -261,6 +287,18 @@
     <p id="modalText"></p>
     <button class="btn primary" id="modalClose">Keep going 🚀</button>
   </div>
+</div>
+<div id="pwModal" class="modal">
+  <form class="modal-card form" id="pwForm" autocomplete="off">
+    <h3 id="pwTitle">Change password</h3>
+    <input id="pwCurrent" type="password" placeholder="Current password" autocomplete="current-password">
+    <input id="pwNew" type="password" placeholder="New password (min 4 characters)" minlength="4" required autocomplete="new-password">
+    <input id="pwNew2" type="password" placeholder="Confirm new password" minlength="4" required autocomplete="new-password">
+    <div class="row">
+      <button class="btn ghost" type="button" id="pwCancel">Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
 </div>
 <canvas id="confetti"></canvas>
 
@@ -282,9 +320,13 @@ const MOTIVATION = {
 const BADGE_NAMES = { 1: 'First Step', 3: 'Getting Going', 7: 'One Week', 14: 'Two Weeks', 30: 'One Month', 50: 'Fifty Club', 75: 'Seventy-Five', 100: 'Century', 150: 'Unstoppable', 200: 'Two Hundred', 250: 'Iron Will', 300: 'Three Hundred', 365: 'Full Year' };
 const SUGGESTIONS = ['🏃 Exercise', '🌅 Wake up early', '📖 Read 10 pages', '💧 Drink 2L water', '🧘 Meditate', '✍️ Journal', '🚭 No junk food', '😴 Sleep by 11'];
 
-let currentUser = localStorage.getItem('streak.user') || null;
+let session = JSON.parse(localStorage.getItem('streak.session') || 'null'); // { token, username, isAdmin }
+let currentUser = null; // whose dashboard is shown (admin may view others)
 let state = null;
 let pollTimer = null;
+let authMode = 'login';
+
+function saveSession(s) { session = s; if (s) localStorage.setItem('streak.session', JSON.stringify(s)); else localStorage.removeItem('streak.session'); }
 
 const $ = s => document.querySelector(s);
 const hashColor = name => PALETTES[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTES.length];
@@ -292,10 +334,14 @@ const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const TZ = -new Date().getTimezoneOffset(); // minutes ahead of UTC (IST = 330)
+function authHeaders(extra = {}) {
+  return session ? { Authorization: 'Bearer ' + session.token, ...extra } : extra;
+}
 async function api(url, opts = {}) {
   url += (url.includes('?') ? '&' : '?') + 'tz=' + TZ;
-  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const res = await fetch(url, { ...opts, headers: authHeaders({ 'Content-Type': 'application/json', ...(opts.headers || {}) }) });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && session) { logout(true); throw new Error('Session expired — please log in again'); }
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
@@ -325,46 +371,100 @@ function fmtDate(key) {
 }
 
 // ============================================================
-//  Welcome screen
+//  Login / register screen
 // ============================================================
+function setAuthMode(mode) {
+  authMode = mode;
+  const reg = mode === 'register';
+  $('#authPass2').hidden = !reg;
+  $('#authPass2').required = reg;
+  $('#authPass').autocomplete = reg ? 'new-password' : 'current-password';
+  $('#authSubmit').textContent = reg ? 'Create account →' : 'Log in →';
+  $('#authSub').textContent = reg ? 'Pick a name and a password to start your streaks.' : 'Small steps, every day. Who\'s checking in?';
+  $('#authSwitch').innerHTML = reg ? 'Already have an account? <a id="authToggle">Log in</a>' : 'New here? <a id="authToggle">Create an account</a>';
+  $('#authToggle').onclick = () => setAuthMode(reg ? 'login' : 'register');
+  $('#userChips').style.display = reg ? 'none' : '';
+}
+
 async function showWelcome() {
   stopPolling();
   $('#dashboard').classList.remove('active');
   $('#welcome').classList.add('active');
+  setAuthMode('login');
   const chips = $('#userChips');
   chips.innerHTML = '';
   try {
     const { users } = await api('/api/users');
-    if (!users.length) chips.innerHTML = '<div class="empty-hint">No users yet — type a name below to create your space.</div>';
+    if (!users.length) chips.innerHTML = '<div class="empty-hint">No users yet — create the first account below.</div>';
     users.forEach(u => {
       const [c1, c2] = hashColor(u);
       const b = document.createElement('button');
+      b.type = 'button';
       b.className = 'chip'; b.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
       b.innerHTML = `<span class="avatar">${esc(u[0].toUpperCase())}</span>${esc(u)}`;
-      b.onclick = () => openUser(u);
+      b.onclick = () => {
+        $('#authUser').value = u;
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('selected', c === b));
+        $('#authPass').focus();
+      };
       chips.appendChild(b);
     });
   } catch (e) { toast(e.message, 'error'); }
-  $('#newUserInput').focus();
+  $('#authUser').focus();
 }
 
-$('#newUserForm').addEventListener('submit', async e => {
+$('#authForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const name = $('#newUserInput').value.trim();
-  if (!name) return;
+  const username = $('#authUser').value.trim();
+  const password = $('#authPass').value;
+  if (!username || !password) return;
+  if (authMode === 'register' && password !== $('#authPass2').value) return toast('Passwords do not match', 'error');
+  const btn = $('#authSubmit');
+  btn.disabled = true;
   try {
-    const { username } = await api('/api/users', { method: 'POST', body: JSON.stringify({ username: name }) });
-    $('#newUserInput').value = '';
-    openUser(username);
+    const res = authMode === 'register'
+      ? await api('/api/users', { method: 'POST', body: JSON.stringify({ username, password }) })
+      : await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    saveSession({ token: res.token, username: res.username, isAdmin: res.isAdmin });
+    $('#authPass').value = ''; $('#authPass2').value = '';
+    await enterApp();
   } catch (err) { toast(err.message, 'error'); }
+  btn.disabled = false;
 });
+
+function logout(silent = false) {
+  saveSession(null);
+  currentUser = null; state = null;
+  showWelcome();
+  if (!silent) toast('Logged out');
+}
+$('#logoutBtn').onclick = () => logout();
 
 // ============================================================
 //  Dashboard
 // ============================================================
+async function enterApp() {
+  const isAdmin = session.isAdmin;
+  document.querySelectorAll('[data-admin]').forEach(el => (el.hidden = !isAdmin));
+  const sel = $('#userSelect');
+  sel.hidden = !isAdmin;
+  if (isAdmin) await refreshUserSelect();
+  await openUser(localStorage.getItem('streak.view') && isAdmin ? localStorage.getItem('streak.view') : session.username);
+}
+
+async function refreshUserSelect() {
+  const sel = $('#userSelect');
+  try {
+    const { users } = await api('/api/users');
+    sel.innerHTML = users.map(u => `<option value="${esc(u)}">${u === session.username ? '👑 ' : '👤 '}${esc(u)}</option>`).join('');
+    if (currentUser) sel.value = currentUser;
+  } catch { /* ignore */ }
+}
+$('#userSelect').onchange = e => openUser(e.target.value);
+
 async function openUser(name) {
   currentUser = name;
-  localStorage.setItem('streak.user', name);
+  if (session.isAdmin) { localStorage.setItem('streak.view', name); $('#userSelect').value = name; }
   $('#welcome').classList.remove('active');
   $('#dashboard').classList.add('active');
   await load();
@@ -379,7 +479,7 @@ async function load(silent = false) {
     if (changed) render();
   } catch (e) {
     if (!silent) toast(e.message, 'error');
-    if (/not found/i.test(e.message)) showWelcome();
+    if (/not found/i.test(e.message) && session) { localStorage.removeItem('streak.view'); if (currentUser !== session.username) openUser(session.username); }
   }
 }
 
@@ -395,8 +495,8 @@ function render() {
   const [c1, c2] = hashColor(username);
   $('#avatar').textContent = username[0].toUpperCase();
   $('#avatar').style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-  $('#userName').textContent = username;
-  $('#todayLabel').textContent = fmtDate(today);
+  $('#userName').innerHTML = esc(username) + (session.isAdmin && username === session.username ? '<span class="admin-tag">ADMIN</span>' : '');
+  $('#todayLabel').textContent = fmtDate(today) + (username !== session.username ? ` · viewing as ${session.username}` : '');
 
   const total = habits.length, done = habits.filter(h => h.doneToday).length;
   $('#todayRing').innerHTML = ringHTML(120, total ? done / total : 0, 'url(#g)', `${done}/${total}`, 'today');
@@ -535,7 +635,18 @@ $('#completeAll').onclick = async () => {
   } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
 };
 
-$('#refreshBtn').onclick = async () => { await load(); toast('Refreshed from Excel'); };
+$('#refreshBtn').onclick = async () => { await load(); if (session.isAdmin) refreshUserSelect(); toast('Refreshed'); };
+
+$('#exportBtn').onclick = async () => {
+  try {
+    const res = await fetch('/api/export', { headers: authHeaders() });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Download failed'); }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'streaks.xlsx'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  } catch (err) { toast(err.message, 'error'); }
+};
 $('#importBtn').onclick = () => $('#importFile').click();
 $('#importFile').onchange = async e => {
   const file = e.target.files[0];
@@ -543,14 +654,38 @@ $('#importFile').onchange = async e => {
   if (!file) return;
   if (!confirm(`Replace ALL data with "${file.name}"?`)) return;
   try {
-    const res = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: file });
+    const res = await fetch('/api/import', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/octet-stream' }), body: file });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     toast(`Imported ${data.users.length} user sheet(s)`, 'success');
-    if (data.users.includes(currentUser)) await load(); else showWelcome();
+    await refreshUserSelect();
+    await openUser(data.users.includes(currentUser) ? currentUser : session.username);
   } catch (err) { toast(err.message, 'error'); }
 };
-$('#switchBtn').onclick = () => { localStorage.removeItem('streak.user'); currentUser = null; state = null; showWelcome(); };
+
+// ---- change password ----
+$('#pwBtn').onclick = () => {
+  const self = currentUser === session.username;
+  $('#pwTitle').textContent = self ? 'Change your password' : `Reset password for ${currentUser}`;
+  $('#pwCurrent').hidden = !self; $('#pwCurrent').required = self;
+  $('#pwForm').reset();
+  $('#pwModal').classList.add('show');
+  (self ? $('#pwCurrent') : $('#pwNew')).focus();
+};
+$('#pwCancel').onclick = () => $('#pwModal').classList.remove('show');
+$('#pwForm').onsubmit = async e => {
+  e.preventDefault();
+  const newPassword = $('#pwNew').value;
+  if (newPassword !== $('#pwNew2').value) return toast('New passwords do not match', 'error');
+  try {
+    const res = await api(`/api/users/${encodeURIComponent(currentUser)}/password`, {
+      method: 'POST', body: JSON.stringify({ currentPassword: $('#pwCurrent').value, newPassword }),
+    });
+    if (res.token) saveSession({ ...session, token: res.token });
+    $('#pwModal').classList.remove('show');
+    toast(currentUser === session.username ? 'Password changed' : `Password reset for ${currentUser}`, 'success');
+  } catch (err) { toast(err.message, 'error'); }
+};
 
 // ============================================================
 //  Celebration: modal + confetti
@@ -596,8 +731,12 @@ function tick() {
 //  Boot
 // ============================================================
 (async () => {
-  if (currentUser) {
-    try { await api(`/api/users/${encodeURIComponent(currentUser)}`); return openUser(currentUser); } catch { /* fall through */ }
+  if (session) {
+    try {
+      const me = await api('/api/me');
+      saveSession({ ...session, username: me.username, isAdmin: me.isAdmin });
+      return enterApp();
+    } catch { saveSession(null); }
   }
   showWelcome();
 })();
