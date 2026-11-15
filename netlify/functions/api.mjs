@@ -5,7 +5,9 @@ import { getStore } from '@netlify/blobs';
 import { createApp } from '../../lib/app.js';
 import { blobStorage } from '../../lib/storage.js';
 
-const handler = serverless(createApp(blobStorage()));
+const handler = serverless(createApp(blobStorage()), {
+  binary: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/octet-stream'],
+});
 
 // Bridge: Web Request (Netlify Functions v2) -> Lambda-style event -> Express -> Web Response
 export default async (req) => {
