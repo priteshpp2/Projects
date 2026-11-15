@@ -4,5 +4,5 @@
   functions = "netlify/functions"
 
 [functions]
-  node_bundler = "nft"
-  included_files = ["lib/**"]
+  node_bundler = "esbuild"
+  external_node_modules = ["exceljs"]
