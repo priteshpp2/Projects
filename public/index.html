@@ -120,7 +120,14 @@
   .checklist .cl-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
   .checklist .cl-head .pending { color: #e17055; }
   .checklist .cl-head .pending.zero { color: #00b894; }
-  .checklist .items { display: flex; flex-wrap: wrap; gap: 8px; }
+  .checklist .cl-head .filters { display: flex; gap: 6px; }
+  .checklist .cl-head .filters button { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 900; background: #f1effc; color: var(--muted); letter-spacing: 0; text-transform: none; }
+  .checklist .cl-head .filters button.on { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; }
+  .checklist .items { display: flex; flex-wrap: wrap; gap: 8px; max-height: 132px; overflow-y: auto; padding: 2px 4px 6px 2px; scrollbar-width: thin; scrollbar-color: #c7c0ff transparent; }
+  .checklist .items::-webkit-scrollbar { width: 6px; }
+  .checklist .items::-webkit-scrollbar-thumb { background: #c7c0ff; border-radius: 99px; }
+  .checklist .items.scrolls { mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); }
+  .checklist .all-clear { font-weight: 800; color: var(--muted); font-size: 14px; padding: 4px 0; }
   .cl-item {
     display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; font-weight: 800; font-size: 14px;
     background: #fff; color: var(--ink); border: 2px solid #ece9ff; box-shadow: 0 4px 12px rgba(45,42,74,.06); transition: transform .15s, background .2s, border-color .2s;
@@ -749,20 +756,31 @@ function render() {
   renderGroups(state.groups || []);
 }
 
-// today's checklist widget: every habit with its status, click to toggle
+// today's checklist widget: every habit with its status (pending first), click to toggle; scrolls when long
+let checklistFilter = localStorage.getItem('streak.clFilter') || 'all';
 function renderChecklist(habits) {
   const el = $('#checklist');
   el.hidden = !habits.length;
   if (!habits.length) return;
-  const pending = habits.filter(h => !h.doneToday);
-  el.innerHTML = `
-    <div class="cl-head"><span>Today's checklist</span>
-      <span class="pending ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending` : 'All done 🎉'}</span></div>
-    <div class="items">${habits.map(h => `
+  const pending = habits.filter(h => !h.doneToday), done = habits.filter(h => h.doneToday);
+  const shown = checklistFilter === 'pending' ? pending : [...pending, ...done];
+  const item = h => `
       <button class="cl-item ${h.doneToday ? 'done' : ''}" data-cl="${h.id}" title="${h.doneToday ? 'Done — click to undo' : 'Pending — click to mark done'}">
         <span class="dot">✓</span><span class="label">${esc(h.name)}</span>${h.currentStreak ? `<span style="opacity:.8;font-size:12px">🔥${h.currentStreak}</span>` : ''}
-      </button>`).join('')}</div>`;
+      </button>`;
+  el.innerHTML = `
+    <div class="cl-head">
+      <span>Today's checklist · <span class="pending ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending` : 'All done 🎉'}</span></span>
+      <span class="filters">
+        <button type="button" data-clf="all" class="${checklistFilter === 'all' ? 'on' : ''}">All (${habits.length})</button>
+        <button type="button" data-clf="pending" class="${checklistFilter === 'pending' ? 'on' : ''}">Pending (${pending.length})</button>
+      </span>
+    </div>
+    <div class="items">${shown.length ? shown.map(item).join('') : '<div class="all-clear">🏆 Nothing pending — every habit is done for today.</div>'}</div>`;
+  const items = el.querySelector('.items');
+  requestAnimationFrame(() => items.classList.toggle('scrolls', items.scrollHeight > items.clientHeight + 2));
   el.querySelectorAll('[data-cl]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.cl));
+  el.querySelectorAll('[data-clf]').forEach(b => b.onclick = () => { checklistFilter = b.dataset.clf; localStorage.setItem('streak.clFilter', checklistFilter); renderChecklist(state.habits); });
 }
 
 function habitCard(h, i, today, milestones) {
