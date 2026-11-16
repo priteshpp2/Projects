@@ -116,18 +116,17 @@
   .hero .complete-all.done { background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 12px 30px rgba(108,92,231,.35); }
 
   /* ---------- today checklist (inside hero) ---------- */
-  .checklist { grid-column: 1 / -1; border-top: 2px dashed #ece9ff; padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
-  .checklist .cl-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
-  .checklist .cl-head .pending { color: #e17055; }
-  .checklist .cl-head .pending.zero { color: #00b894; }
-  .checklist .cl-head .filters { display: flex; gap: 6px; }
-  .checklist .cl-head .filters button { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 900; background: #f1effc; color: var(--muted); letter-spacing: 0; text-transform: none; }
-  .checklist .cl-head .filters button.on { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; }
-  .checklist .items { display: flex; flex-wrap: wrap; gap: 8px; max-height: 132px; overflow-y: auto; padding: 2px 4px 6px 2px; scrollbar-width: thin; scrollbar-color: #c7c0ff transparent; }
-  .checklist .items::-webkit-scrollbar { width: 6px; }
-  .checklist .items::-webkit-scrollbar-thumb { background: #c7c0ff; border-radius: 99px; }
-  .checklist .items.scrolls { mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); }
-  .checklist .all-clear { font-weight: 800; color: var(--muted); font-size: 14px; padding: 4px 0; }
+  .checklist { grid-column: 1 / -1; border-top: 2px dashed #ece9ff; padding-top: 16px; }
+  .cl-tile { border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; background: #f7f6ff; border: 2px solid #ece9ff; }
+  .cl-tile .cl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+  .cl-tile .cl-head .count { font-size: 12px; font-weight: 900; border-radius: 999px; padding: 3px 10px; background: #e17055; color: #fff; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+  .cl-tile .cl-head .count.zero { background: #00b894; }
+  .cl-tile .items { display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; padding: 2px 4px 6px 2px; scrollbar-width: thin; scrollbar-color: #c7c0ff transparent; }
+  .cl-tile .items::-webkit-scrollbar { width: 6px; }
+  .cl-tile .items::-webkit-scrollbar-thumb { background: #c7c0ff; border-radius: 99px; }
+  .cl-tile .items.scrolls { mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); }
+  .cl-tile .progress { height: 6px; border-radius: 99px; background: rgba(108,92,231,.12); overflow: hidden; }
+  .cl-tile .progress i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #6c5ce7, #00b894); transition: width .8s cubic-bezier(.2,1,.3,1); }
   .cl-item {
     display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; font-weight: 800; font-size: 14px;
     background: #fff; color: var(--ink); border: 2px solid #ece9ff; box-shadow: 0 4px 12px rgba(45,42,74,.06); transition: transform .15s, background .2s, border-color .2s;
@@ -137,6 +136,7 @@
   .cl-item.done { background: linear-gradient(135deg, #00b894, #55efc4); color: #fff; border-color: transparent; }
   .cl-item.done .dot { background: #fff; color: #00b894; border-color: #fff; }
   .cl-item.done .label { text-decoration: line-through; opacity: .85; }
+  .cl-item .streak { opacity: .8; font-size: 12px; }
 
   /* ---------- rings ---------- */
   .ring { position: relative; display: grid; place-items: center; }
@@ -214,6 +214,8 @@
   .check.done { background: rgba(255,255,255,.22); color: #fff; box-shadow: none; }
   .check .ico { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 2.5px solid currentColor; font-size: 12px; }
   .check.done .ico { background: #fff; color: #00b894; border-color: #fff; }
+  .habit .break { margin-top: 8px; align-self: center; background: transparent; color: rgba(255,255,255,.8); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; border: 1.5px dashed rgba(255,255,255,.45); }
+  .habit .break:hover { background: rgba(0,0,0,.2); color: #fff; }
   .habit.celebrate { animation: celebrate .6s cubic-bezier(.2,1.4,.4,1); }
   @keyframes celebrate { 0%{transform:scale(1)} 40%{transform:scale(1.05) rotate(-1deg)} 70%{transform:scale(.98) rotate(1deg)} 100%{transform:scale(1)} }
 
@@ -307,6 +309,7 @@
 
   @media (max-width: 720px) {
     .hero { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .checklist { width: 100%; text-align: left; }
     .topbar .actions { width: 100%; justify-content: flex-start; }
   }
 </style>
@@ -756,31 +759,27 @@ function render() {
   renderGroups(state.groups || []);
 }
 
-// today's checklist widget: every habit with its status (pending first), click to toggle; scrolls when long
-let checklistFilter = localStorage.getItem('streak.clFilter') || 'all';
+// today's checklist: every habit with today's status (pending first); click a chip to toggle quietly (no popup)
 function renderChecklist(habits) {
   const el = $('#checklist');
   el.hidden = !habits.length;
   if (!habits.length) return;
   const pending = habits.filter(h => !h.doneToday), done = habits.filter(h => h.doneToday);
-  const shown = checklistFilter === 'pending' ? pending : [...pending, ...done];
   const item = h => `
       <button class="cl-item ${h.doneToday ? 'done' : ''}" data-cl="${h.id}" title="${h.doneToday ? 'Done — click to undo' : 'Pending — click to mark done'}">
-        <span class="dot">✓</span><span class="label">${esc(h.name)}</span>${h.currentStreak ? `<span style="opacity:.8;font-size:12px">🔥${h.currentStreak}</span>` : ''}
+        <span class="dot">✓</span><span class="label">${esc(h.name)}</span>${h.currentStreak ? `<span class="streak">🔥${h.currentStreak}</span>` : ''}
       </button>`;
   el.innerHTML = `
-    <div class="cl-head">
-      <span>Today's checklist · <span class="pending ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending` : 'All done 🎉'}</span></span>
-      <span class="filters">
-        <button type="button" data-clf="all" class="${checklistFilter === 'all' ? 'on' : ''}">All (${habits.length})</button>
-        <button type="button" data-clf="pending" class="${checklistFilter === 'pending' ? 'on' : ''}">Pending (${pending.length})</button>
-      </span>
-    </div>
-    <div class="items">${shown.length ? shown.map(item).join('') : '<div class="all-clear">🏆 Nothing pending — every habit is done for today.</div>'}</div>`;
-  const items = el.querySelector('.items');
-  requestAnimationFrame(() => items.classList.toggle('scrolls', items.scrollHeight > items.clientHeight + 2));
-  el.querySelectorAll('[data-cl]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.cl));
-  el.querySelectorAll('[data-clf]').forEach(b => b.onclick = () => { checklistFilter = b.dataset.clf; localStorage.setItem('streak.clFilter', checklistFilter); renderChecklist(state.habits); });
+    <div class="cl-tile">
+      <div class="cl-head"><span>📋 Today's habits</span><span class="count ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending · ${done.length}/${habits.length} done` : `All ${habits.length} done 🏆`}</span></div>
+      <div class="progress"><i data-w="${Math.round(done.length / habits.length * 100)}"></i></div>
+      <div class="items">${[...pending, ...done].map(item).join('')}</div>
+    </div>`;
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.items').forEach(it => it.classList.toggle('scrolls', it.scrollHeight > it.clientHeight + 2));
+    el.querySelectorAll('.progress i').forEach(b => (b.style.width = b.dataset.w + '%'));
+  });
+  el.querySelectorAll('[data-cl]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.cl, { quiet: true }));
 }
 
 function habitCard(h, i, today, milestones) {
@@ -824,6 +823,7 @@ function habitCard(h, i, today, milestones) {
     <button class="check ${h.doneToday ? 'done' : ''}" data-toggle="${h.id}">
       <span class="ico">${h.doneToday ? '✓' : ''}</span>${h.doneToday ? 'Completed today' : 'Mark as done'}
     </button>
+    ${h.currentStreak ? `<button class="break" data-break="${h.id}" title="Reset the current streak to 0 (history and badges are kept)">💔 Break streak</button>` : ''}
   </div>`;
 }
 
@@ -842,6 +842,7 @@ function addCard() {
 function bindCards() {
   document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.toggle));
   document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteHabit(+b.dataset.del));
+  document.querySelectorAll('[data-break]').forEach(b => b.onclick = () => breakStreak(+b.dataset.break));
   document.querySelectorAll('[data-suggest]').forEach(b => b.onclick = () => { $('#addInput').value = b.dataset.suggest; $('#addInput').focus(); });
   $('#addForm').onsubmit = async e => {
     e.preventDefault();
@@ -855,7 +856,7 @@ function bindCards() {
   };
 }
 
-async function toggleHabit(id) {
+async function toggleHabit(id, { quiet = false } = {}) {
   const btn = document.querySelector(`[data-toggle="${id}"]`);
   const wasDone = state.habits[id].doneToday;
   if (btn) btn.disabled = true;
@@ -873,7 +874,8 @@ async function toggleHabit(id) {
       if (changed.newBadges.length) {
         changed.newBadges.forEach(m => { const el = [...newCard.querySelectorAll('.badge')].find(b => b.textContent == m); if (el) el.classList.add('new'); });
         playSound('badge');
-        celebrate(h.name, Math.max(...changed.newBadges));
+        if (quiet) toast(`🏅 ${h.name}: ${BADGE_NAMES[Math.max(...changed.newBadges)]} unlocked!`, 'success');
+        else celebrate(h.name, Math.max(...changed.newBadges));
       } else {
         playSound(allDone ? 'all' : 'done');
         toast(`🔥 ${h.name}: ${h.currentStreak}-day streak!`, 'success');
@@ -884,6 +886,17 @@ async function toggleHabit(id) {
       toast('Unmarked for today');
     }
   } catch (err) { toast(err.message, 'error'); if (btn) btn.disabled = false; }
+}
+
+async function breakStreak(id) {
+  const h = state.habits[id];
+  if (!confirm(`Break your ${h.currentStreak}-day streak on "${h.name}"? It restarts from 0 today. History, totals and badges are kept.`)) return;
+  try {
+    state = await api(`/api/users/${encodeURIComponent(currentUser)}/habits/${id}/break`, { method: 'POST', body: JSON.stringify({}) });
+    render();
+    playSound('undo');
+    toast(`💔 Streak reset for "${h.name}" — fresh start!`);
+  } catch (err) { toast(err.message, 'error'); }
 }
 
 async function deleteHabit(id) {

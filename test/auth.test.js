@@ -149,7 +149,29 @@ async function main() {
     r = await call('GET', '/api/export', { token: admin });
     const check = new ExcelJS.Workbook();
     await check.xlsx.load(r.body);
-    assert.deepStrictEqual(check.worksheets.map(w => w.name).sort(), ['Amrita', 'Pritesh', '_auth', '_groups'], 'workbook consistent');
+    assert.deepStrictEqual(check.worksheets.map(w => w.name).sort(), ['Amrita', 'Pritesh', '_auth', '_groups', '_resets'], 'workbook consistent');
+
+    // ---- break streak ----
+    r = await call('POST', '/api/login', { body: { username: 'Amrita', password: 'abc@123' } });
+    const amritaB = r.body.token;
+    r = await call('POST', '/api/users/Amrita/habits', { token: amritaB, body: { name: 'Yoga' } });
+    const exId = r.body.habits.findIndex(h => h.name === 'Yoga');
+    const todayKey = r.body.today;
+    const dayBefore = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() - 1); return x.toISOString().slice(0, 10); };
+    await call('POST', `/api/users/Amrita/habits/${exId}/toggle`, { token: amritaB, body: { date: dayBefore(todayKey) } });
+    r = await call('POST', `/api/users/Amrita/habits/${exId}/toggle`, { token: amritaB, body: {} });
+    assert.strictEqual(r.body.habits[exId].currentStreak, 2, 'streak of 2 before break');
+    const totalBefore = r.body.habits[exId].totalCompletions;
+    r = await call('POST', `/api/users/Amrita/habits/${exId}/break`, { token: amritaB, body: {} });
+    assert.strictEqual(r.status, 200, 'break ok');
+    assert.strictEqual(r.body.habits[exId].currentStreak, 0, 'streak reset to 0');
+    assert.strictEqual(r.body.habits[exId].doneToday, false, 'today cleared');
+    assert.strictEqual(r.body.habits[exId].totalCompletions, totalBefore - 1, 'history kept (only today removed)');
+    assert.strictEqual(r.body.habits[exId].longestStreak, 1, 'past history still counts toward longest');
+    r = await call('POST', `/api/users/Amrita/habits/${exId}/toggle`, { token: amritaB, body: {} });
+    assert.strictEqual(r.body.habits[exId].currentStreak, 1, 'fresh streak starts at 1 after break');
+    r = await call('POST', `/api/users/Amrita/habits/${exId}/break`, { token: amrita });
+    assert.strictEqual(r.status, 401, 'revoked token cannot break');
 
     // ---- group challenges ----
     r = await call('POST', '/api/login', { body: { username: 'Amrita', password: 'abc@123' } });
