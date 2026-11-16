@@ -65,6 +65,17 @@
   .auth-form .btn { width: 100%; padding: 14px; font-size: 16px; }
   .auth-switch { margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--muted); }
   .auth-switch a { color: #6c5ce7; cursor: pointer; text-decoration: underline; }
+  .auth-switch a + a { margin-left: 4px; }
+
+  .banner {
+    background: linear-gradient(135deg, #fdcb6e, #e17055); color: #fff; border-radius: var(--radius); padding: 14px 18px; margin-bottom: 18px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; animation: pop .4s cubic-bezier(.2,1.4,.4,1);
+  }
+  .banner h4 { margin: 0; font-size: 15px; font-weight: 900; }
+  .banner .req { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-weight: 800; font-size: 14px; }
+  .banner .req span { flex: 1; min-width: 120px; }
+  .banner .btn.small { padding: 6px 12px; font-size: 12px; }
+  .btn.danger { background: #d63031; color: #fff; }
   .empty-hint { color: var(--muted); font-size: 14px; font-weight: 700; }
 
   .user-select {
@@ -104,6 +115,22 @@
   .hero .complete-all:hover { transform: translateY(-3px) scale(1.02); }
   .hero .complete-all.done { background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 12px 30px rgba(108,92,231,.35); }
 
+  /* ---------- today checklist (inside hero) ---------- */
+  .checklist { grid-column: 1 / -1; border-top: 2px dashed #ece9ff; padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .checklist .cl-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+  .checklist .cl-head .pending { color: #e17055; }
+  .checklist .cl-head .pending.zero { color: #00b894; }
+  .checklist .items { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cl-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; font-weight: 800; font-size: 14px;
+    background: #fff; color: var(--ink); border: 2px solid #ece9ff; box-shadow: 0 4px 12px rgba(45,42,74,.06); transition: transform .15s, background .2s, border-color .2s;
+  }
+  .cl-item:hover { transform: translateY(-2px); border-color: #6c5ce7; }
+  .cl-item .dot { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 900; border: 2.5px solid #d9d5ff; color: transparent; transition: all .2s; }
+  .cl-item.done { background: linear-gradient(135deg, #00b894, #55efc4); color: #fff; border-color: transparent; }
+  .cl-item.done .dot { background: #fff; color: #00b894; border-color: #fff; }
+  .cl-item.done .label { text-decoration: line-through; opacity: .85; }
+
   /* ---------- rings ---------- */
   .ring { position: relative; display: grid; place-items: center; }
   .ring svg { transform: rotate(-90deg); }
@@ -117,70 +144,130 @@
   /* ---------- habit grid ---------- */
   .section-title { display: flex; align-items: center; justify-content: space-between; margin: 0 0 14px; }
   .section-title h3 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 
   .habit {
-    position: relative; overflow: hidden; border-radius: var(--radius); padding: 20px 20px 18px; color: #fff;
-    box-shadow: 0 14px 34px rgba(0,0,0,.15); animation: pop .45s cubic-bezier(.2,1.4,.4,1) both;
+    position: relative; overflow: hidden; border-radius: 20px; padding: 16px 16px 14px; color: #fff; display: flex; flex-direction: column;
+    box-shadow: 0 10px 26px rgba(0,0,0,.15); animation: pop .45s cubic-bezier(.2,1.4,.4,1) both;
     transition: transform .2s;
   }
   .habit:hover { transform: translateY(-4px); }
   .habit::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 90% -10%, rgba(255,255,255,.35), transparent 50%); pointer-events: none; }
   .habit.done { outline: 3px solid rgba(255,255,255,.75); outline-offset: -3px; }
   .habit .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-  .habit .name { font-size: 20px; font-weight: 900; margin: 0; line-height: 1.2; word-break: break-word; }
-  .habit .del { background: rgba(255,255,255,.2); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 15px; opacity: .7; transition: opacity .2s, background .2s; flex-shrink: 0; }
+  .habit .head > div:first-child { flex: 1; min-width: 0; }
+  .habit .name { font-size: 17px; font-weight: 900; margin: 0; line-height: 1.2; word-break: break-word; }
+  .habit .gtag { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; font-size: 11px; font-weight: 800; background: rgba(255,255,255,.22); border-radius: 999px; padding: 2px 9px; }
+  .habit .gtag.top { background: linear-gradient(135deg, #ffeaa7, #fdcb6e); color: #6d4c00; }
+  .habit .del { background: rgba(255,255,255,.2); color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: 13px; opacity: .7; transition: opacity .2s, background .2s; flex-shrink: 0; }
   .habit .del:hover { opacity: 1; background: rgba(0,0,0,.25); }
-  .habit .body { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+  .habit .body { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+  .habit .ring circle { stroke-width: 8; }
   .habit .ring .track { stroke: rgba(255,255,255,.25); }
   .habit .ring .bar { stroke: #fff; filter: drop-shadow(0 0 6px rgba(255,255,255,.6)); }
-  .habit .ring .label span { color: rgba(255,255,255,.85); }
+  .habit .ring .label b { font-size: 26px; }
+  .habit .ring .label span { color: rgba(255,255,255,.85); font-size: 9px; }
   .habit .stats { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .habit .stat { background: rgba(255,255,255,.18); border-radius: 14px; padding: 8px 10px; }
-  .habit .stat b { display: block; font-size: 20px; font-weight: 900; }
-  .habit .stat span { font-size: 11px; font-weight: 800; opacity: .9; text-transform: uppercase; letter-spacing: .4px; }
-  .habit .next { font-size: 12px; font-weight: 800; opacity: .9; margin-top: 10px; }
+  .habit .stat {
+    background: rgba(255,255,255,.22); border-radius: 16px; padding: 10px 6px 8px; text-align: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 6px 14px rgba(0,0,0,.08); backdrop-filter: blur(4px);
+  }
+  .habit .stat i { font-style: normal; font-size: 16px; display: block; line-height: 1; }
+  .habit .stat b { display: block; font-size: 24px; font-weight: 900; line-height: 1.1; margin-top: 3px; text-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  .habit .stat span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .6px; font-weight: 800; opacity: .9; margin-top: 1px; }
+  .habit .next { margin-top: 12px; font-size: 11px; font-weight: 800; }
+  .habit .next .track { height: 7px; background: rgba(255,255,255,.25); border-radius: 99px; overflow: hidden; margin-bottom: 5px; }
+  .habit .next .track i { display: block; height: 100%; width: 0; background: #fff; border-radius: 99px; box-shadow: 0 0 8px rgba(255,255,255,.8); transition: width .8s cubic-bezier(.2,1,.3,1); }
+  .habit .next .row { display: flex; justify-content: space-between; opacity: .95; }
 
-  .week { display: flex; gap: 6px; margin-top: 12px; }
-  .week .day { flex: 1; text-align: center; font-size: 10px; font-weight: 800; opacity: .9; }
-  .week .dot { width: 100%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.25); margin: 0 auto 3px; border: 2px solid transparent; display: grid; place-items: center; font-size: 11px; }
+  .week { display: flex; gap: 4px; margin-top: 10px; }
+  .week .day { flex: 1; text-align: center; font-size: 9px; font-weight: 800; opacity: .9; }
+  .week .dot { width: 100%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.25); margin: 0 auto 2px; border: 2px solid transparent; display: grid; place-items: center; font-size: 10px; }
   .week .dot.on { background: #fff; color: #2d2a4a; }
   .week .dot.today { border-color: #fff; }
 
-  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; min-height: 26px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; padding-top: 10px; min-height: 34px; align-items: center; }
   .badge {
-    width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 900;
+    width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 900;
     background: linear-gradient(135deg, #ffeaa7, #fdcb6e); color: #6d4c00; box-shadow: 0 3px 10px rgba(0,0,0,.2); position: relative;
     cursor: default;
   }
-  .badge.locked { background: rgba(255,255,255,.18); color: rgba(255,255,255,.55); box-shadow: none; }
+  .badge.locked { background: rgba(255,255,255,.18); color: rgba(255,255,255,.7); box-shadow: none; border: 1.5px dashed rgba(255,255,255,.5); }
+  .badges .more { font-size: 10px; font-weight: 800; opacity: .85; }
   .badge.new { animation: badgeIn .9s cubic-bezier(.2,1.6,.4,1) both; }
   @keyframes badgeIn { 0%{transform:scale(0) rotate(-180deg)} 60%{transform:scale(1.4) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
 
   .check {
-    margin-top: 16px; width: 100%; padding: 14px; border-radius: 16px; font-size: 16px; font-weight: 900;
+    margin-top: 12px; width: 100%; padding: 10px; border-radius: 12px; font-size: 14px; font-weight: 900;
     background: #fff; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 10px;
     transition: transform .15s, background .25s; box-shadow: 0 8px 20px rgba(0,0,0,.15);
   }
   .check:hover { transform: translateY(-2px); }
   .check:active { transform: scale(.96); }
   .check.done { background: rgba(255,255,255,.22); color: #fff; box-shadow: none; }
-  .check .ico { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; border: 2.5px solid currentColor; font-size: 14px; }
+  .check .ico { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 2.5px solid currentColor; font-size: 12px; }
   .check.done .ico { background: #fff; color: #00b894; border-color: #fff; }
   .habit.celebrate { animation: celebrate .6s cubic-bezier(.2,1.4,.4,1); }
   @keyframes celebrate { 0%{transform:scale(1)} 40%{transform:scale(1.05) rotate(-1deg)} 70%{transform:scale(.98) rotate(1deg)} 100%{transform:scale(1)} }
 
   /* ---------- add habit ---------- */
   .add-card {
-    border-radius: var(--radius); padding: 20px; background: rgba(255,255,255,.55); border: 3px dashed rgba(255,255,255,.9);
-    display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 200px; backdrop-filter: blur(6px);
+    border-radius: 18px; padding: 16px; background: rgba(255,255,255,.55); border: 3px dashed rgba(255,255,255,.9);
+    display: flex; flex-direction: column; justify-content: center; gap: 10px; min-height: 160px; backdrop-filter: blur(6px);
   }
-  .add-card h4 { margin: 0; font-size: 18px; font-weight: 900; }
+  .add-card h4 { margin: 0; font-size: 16px; font-weight: 900; }
   .add-card input { padding: 13px 16px; border-radius: 14px; border: 2px solid #fff; font-family: inherit; font-size: 15px; font-weight: 700; outline: none; background: #fff; }
   .add-card input:focus { border-color: #6c5ce7; }
   .suggest { display: flex; flex-wrap: wrap; gap: 6px; }
   .suggest button { background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 800; color: var(--muted); }
   .suggest button:hover { color: #6c5ce7; }
+
+  /* ---------- groups ---------- */
+  .group {
+    background: var(--card); border-radius: 20px; padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+    animation: pop .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .group .g-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .group .g-head h4 { margin: 0; font-size: 17px; font-weight: 900; }
+  .group .g-habit { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 800; color: #6c5ce7; background: #efecff; border-radius: 999px; padding: 2px 10px; }
+  .group .g-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .group .g-actions button { background: #f1effc; color: var(--muted); width: 28px; height: 28px; border-radius: 50%; font-size: 13px; }
+  .group .g-actions button:hover { background: #e4e0ff; color: #6c5ce7; }
+  .board { display: flex; flex-direction: column; gap: 6px; }
+  .board .row {
+    display: grid; grid-template-columns: 30px 30px 1fr auto auto; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 14px; background: #f7f6ff; font-weight: 800; font-size: 14px;
+  }
+  .board .row.me { background: linear-gradient(135deg, #efecff, #e4f9f3); outline: 2px solid #c7c0ff; }
+  .board .row.first { background: linear-gradient(135deg, #fff6d6, #ffeaa7); }
+  .board .rank { font-size: 16px; text-align: center; }
+  .board .rank.num { font-size: 12px; color: var(--muted); }
+  .board .av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 900; }
+  .board .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board .nm small { color: var(--muted); font-weight: 700; font-size: 11px; }
+  .board .fire { font-size: 15px; font-weight: 900; white-space: nowrap; }
+  .board .fire small { font-size: 11px; color: var(--muted); font-weight: 800; }
+  .board .td { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 900; background: #ece9ff; color: #b7b2d8; }
+  .board .td.on { background: #00b894; color: #fff; }
+  .group .g-foot { display: flex; gap: 8px; align-items: center; }
+  .group .g-foot select { flex: 1; padding: 8px 12px; border-radius: 999px; border: 2px solid #ece9ff; font-family: inherit; font-weight: 800; font-size: 13px; outline: none; background: #fff; color: var(--ink); }
+  .group-empty {
+    border-radius: 20px; padding: 22px; background: rgba(255,255,255,.55); border: 3px dashed rgba(255,255,255,.9); backdrop-filter: blur(6px);
+    display: flex; flex-direction: column; align-items: flex-start; gap: 10px; grid-column: 1 / -1;
+  }
+  .group-empty h4 { margin: 0; font-size: 18px; font-weight: 900; }
+  .group-empty p { margin: 0; color: var(--muted); font-weight: 700; font-size: 14px; }
+
+  .member-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; max-height: 160px; overflow: auto; }
+  .member-list label { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: #f1effc; font-weight: 800; font-size: 13px; cursor: pointer; user-select: none; }
+  .member-list label:has(input:checked) { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; }
+  .member-list input { display: none; }
+  .modal-card.form .hint { font-size: 12px; color: var(--muted); font-weight: 700; margin: -4px 0 10px; }
+
+  .user-rows { display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow: auto; margin-bottom: 12px; }
+  .user-rows .row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: #f7f6ff; font-weight: 800; }
+  .user-rows .av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 900; }
+  .user-rows .nm { flex: 1; }
+  .user-rows .btn.small { padding: 6px 12px; font-size: 12px; }
 
   /* ---------- toast / modal ---------- */
   .toast {
@@ -233,7 +320,7 @@
         <input id="authPass2" type="password" placeholder="Confirm password" autocomplete="new-password" hidden>
         <button class="btn primary" type="submit" id="authSubmit">Log in →</button>
       </form>
-      <div class="auth-switch" id="authSwitch">New here? <a id="authToggle">Create an account</a></div>
+      <div class="auth-switch" id="authSwitch">New here? <a id="authToggle">Create an account</a> · <a id="forgotLink">Forgot password?</a></div>
     </div>
   </div>
   <div class="footer" style="position:fixed;bottom:0;left:0;right:0">Creator: <b>Pritesh Pawar</b></div>
@@ -252,14 +339,18 @@
       </div>
       <div class="actions">
         <select class="user-select" id="userSelect" title="View another user's streaks (admin)" hidden></select>
-        <button class="btn ghost small" id="refreshBtn" title="Reload latest data">⟳ Refresh</button>
         <button class="btn ghost small" id="exportBtn" data-admin hidden title="Download the Excel workbook">⬇ Excel</button>
         <button class="btn ghost small" id="importBtn" data-admin hidden title="Upload an edited streaks.xlsx (replaces all data)">⬆ Upload Excel</button>
         <input type="file" id="importFile" accept=".xlsx" hidden>
+        <button class="btn ghost small" id="usersBtn" data-admin hidden title="Manage users">👥 Users</button>
+        <button class="btn ghost small" id="soundBtn" title="Toggle sounds">🔊</button>
         <button class="btn ghost small" id="pwBtn">🔑 Change password</button>
+        <button class="btn danger small" id="delUserBtn" hidden title="Delete this user and all their data">🗑 Delete user</button>
         <button class="btn ghost small" id="logoutBtn">⏻ Log out</button>
       </div>
     </div>
+
+    <div id="resetBanner" class="banner" hidden></div>
 
     <div class="hero">
       <div class="ring" id="todayRing"></div>
@@ -268,12 +359,19 @@
         <p id="motivation">Let's make today count.</p>
       </div>
       <button class="complete-all" id="completeAll">✨ Complete all for today</button>
+      <div class="checklist" id="checklist" hidden></div>
     </div>
 
     <div class="section-title">
       <h3 id="habitCount">Your habits</h3>
     </div>
     <div id="grid" class="grid"></div>
+
+    <div class="section-title" style="margin-top:30px">
+      <h3 id="groupCount">👥 Group challenges</h3>
+      <button class="btn small" id="newGroupBtn">+ New group</button>
+    </div>
+    <div id="groups" class="grid"></div>
   </div>
   <div class="footer">Creator: <b>Pritesh Pawar</b></div>
 </section>
@@ -299,6 +397,27 @@
       <button class="btn primary" type="submit">Save</button>
     </div>
   </form>
+</div>
+<div id="groupModal" class="modal">
+  <form class="modal-card form" id="groupForm" autocomplete="off">
+    <h3>👥 New group challenge</h3>
+    <input id="gName" placeholder="Group name (e.g. Morning Runners)" maxlength="40" required>
+    <input id="gHabit" placeholder="Shared habit (e.g. 🏃 Exercise)" maxlength="60" required list="gHabitList">
+    <datalist id="gHabitList"></datalist>
+    <div class="hint">Everyone gets this habit on their own board and keeps their own streak — highest streak leads.</div>
+    <div class="member-list" id="gMembers"></div>
+    <div class="row">
+      <button class="btn ghost" type="button" id="gCancel">Cancel</button>
+      <button class="btn primary" type="submit">Start challenge</button>
+    </div>
+  </form>
+</div>
+<div id="usersModal" class="modal">
+  <div class="modal-card form">
+    <h3>👥 Manage users</h3>
+    <div class="user-rows" id="userRows"></div>
+    <div class="row"><button class="btn ghost" type="button" id="usersClose">Close</button></div>
+  </div>
 </div>
 <canvas id="confetti"></canvas>
 
@@ -370,6 +489,40 @@ function fmtDate(key) {
   return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
+// ---- sounds (synthesised with Web Audio, no files needed) ----
+let soundOn = localStorage.getItem('streak.sound') !== 'off';
+let audioCtx = null;
+const SOUNDS = {
+  done: { notes: [659.25, 987.77], gap: .09, len: .45 },
+  undo: { notes: [440, 330], gap: .1, len: .3 },
+  badge: { notes: [659.25, 783.99, 1046.5], gap: .1, len: .55 },
+  all: { notes: [523.25, 659.25, 783.99, 1046.5, 1318.5], gap: .11, len: .6 },
+};
+function playSound(kind) {
+  if (!soundOn || !SOUNDS[kind]) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const { notes, gap, len } = SOUNDS[kind];
+    const t0 = audioCtx.currentTime + .01;
+    notes.forEach((f, i) => {
+      const t = t0 + i * gap;
+      [['sine', 1], ['triangle', .35]].forEach(([type, vol]) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = type; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(.22 * vol, t + .015);
+        g.gain.exponentialRampToValueAtTime(.0005, t + len);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t); o.stop(t + len + .05);
+      });
+    });
+  } catch { /* audio unavailable */ }
+}
+function renderSoundBtn() { $('#soundBtn').textContent = soundOn ? '🔊' : '🔇'; $('#soundBtn').title = soundOn ? 'Sounds on — click to mute' : 'Sounds off — click to unmute'; }
+$('#soundBtn').onclick = () => { soundOn = !soundOn; localStorage.setItem('streak.sound', soundOn ? 'on' : 'off'); renderSoundBtn(); if (soundOn) playSound('done'); };
+renderSoundBtn();
+
 // ============================================================
 //  Login / register screen
 // ============================================================
@@ -381,9 +534,22 @@ function setAuthMode(mode) {
   $('#authPass').autocomplete = reg ? 'new-password' : 'current-password';
   $('#authSubmit').textContent = reg ? 'Create account →' : 'Log in →';
   $('#authSub').textContent = reg ? 'Pick a name and a password to start your streaks.' : 'Small steps, every day. Who\'s checking in?';
-  $('#authSwitch').innerHTML = reg ? 'Already have an account? <a id="authToggle">Log in</a>' : 'New here? <a id="authToggle">Create an account</a>';
+  $('#authSwitch').innerHTML = reg
+    ? 'Already have an account? <a id="authToggle">Log in</a>'
+    : 'New here? <a id="authToggle">Create an account</a> · <a id="forgotLink">Forgot password?</a>';
   $('#authToggle').onclick = () => setAuthMode(reg ? 'login' : 'register');
+  if (!reg) $('#forgotLink').onclick = forgotPassword;
   $('#userChips').style.display = reg ? 'none' : '';
+}
+
+async function forgotPassword() {
+  const username = $('#authUser').value.trim();
+  if (!username) { toast('Type or pick your name first', 'error'); return $('#authUser').focus(); }
+  if (!confirm(`Ask the admin to reset the password for "${username}"?`)) return;
+  try {
+    const { message } = await api(`/api/users/${encodeURIComponent(username)}/reset-request`, { method: 'POST', body: '{}' });
+    toast(message, 'success');
+  } catch (err) { toast(err.message, 'error'); }
 }
 
 async function showWelcome() {
@@ -448,23 +614,81 @@ async function enterApp() {
   document.querySelectorAll('[data-admin]').forEach(el => (el.hidden = !isAdmin));
   const sel = $('#userSelect');
   sel.hidden = !isAdmin;
-  if (isAdmin) await refreshUserSelect();
+  if (isAdmin) await refreshAdmin();
   await openUser(localStorage.getItem('streak.view') && isAdmin ? localStorage.getItem('streak.view') : session.username);
 }
 
-async function refreshUserSelect() {
-  const sel = $('#userSelect');
+// admin: refresh user dropdown + pending password-reset requests
+async function refreshAdmin() {
+  if (!session || !session.isAdmin) return;
   try {
-    const { users } = await api('/api/users');
-    sel.innerHTML = users.map(u => `<option value="${esc(u)}">${u === session.username ? '👑 ' : '👤 '}${esc(u)}</option>`).join('');
+    const me = await api('/api/me');
+    const sel = $('#userSelect');
+    sel.innerHTML = me.users.map(u => `<option value="${esc(u)}">${u === session.username ? '👑 ' : '👤 '}${esc(u)}</option>`).join('');
     if (currentUser) sel.value = currentUser;
+    renderResetBanner(me.resetRequests || []);
   } catch { /* ignore */ }
+}
+
+function renderResetBanner(reqs) {
+  const el = $('#resetBanner');
+  el.hidden = !reqs.length;
+  if (!reqs.length) return;
+  el.innerHTML = `<h4>🔔 Password reset request${reqs.length > 1 ? 's' : ''}</h4>` + reqs.map(r => `
+    <div class="req"><span>${esc(r.username)} · ${new Date(r.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+      <button class="btn small" data-reset="${esc(r.username)}">Reset to abc@123</button>
+      <button class="btn ghost small" data-dismiss="${esc(r.username)}">Dismiss</button></div>`).join('');
+  el.querySelectorAll('[data-reset]').forEach(b => b.onclick = async () => {
+    try {
+      const res = await api(`/api/users/${encodeURIComponent(b.dataset.reset)}/reset`, { method: 'POST', body: '{}' });
+      renderResetBanner(res.resetRequests);
+      toast(`${res.username}'s password is now abc@123`, 'success');
+    } catch (err) { toast(err.message, 'error'); }
+  });
+  el.querySelectorAll('[data-dismiss]').forEach(b => b.onclick = async () => {
+    try {
+      const res = await api(`/api/users/${encodeURIComponent(b.dataset.dismiss)}/reset-request`, { method: 'DELETE' });
+      renderResetBanner(res.resetRequests);
+    } catch (err) { toast(err.message, 'error'); }
+  });
 }
 $('#userSelect').onchange = e => openUser(e.target.value);
 
+async function deleteUser(name) {
+  if (!confirm(`Delete user "${name}" and ALL their habits and history? This cannot be undone.`)) return false;
+  if (prompt(`Type the name "${name}" to confirm:`) !== name) { toast('Name did not match — nothing deleted'); return false; }
+  try {
+    await api(`/api/users/${encodeURIComponent(name)}`, { method: 'DELETE' });
+    toast(`Deleted user "${name}"`, 'success');
+    await refreshAdmin();
+    if (currentUser === name) await openUser(session.username); else await load(true);
+    return true;
+  } catch (err) { toast(err.message, 'error'); return false; }
+}
+$('#delUserBtn').onclick = () => deleteUser(currentUser);
+
+// admin: manage users modal
+$('#usersBtn').onclick = () => { renderUsersModal(); $('#usersModal').classList.add('show'); };
+$('#usersClose').onclick = () => $('#usersModal').classList.remove('show');
+function renderUsersModal() {
+  const users = [...$('#userSelect').options].map(o => o.value);
+  $('#userRows').innerHTML = users.map(u => {
+    const [c1, c2] = hashColor(u);
+    const self = u === session.username;
+    return `<div class="row"><div class="av" style="background:linear-gradient(135deg,${c1},${c2})">${esc(u[0].toUpperCase())}</div>
+      <div class="nm">${esc(u)}${self ? ' <span class="admin-tag">ADMIN</span>' : ''}</div>
+      <button class="btn ghost small" data-view="${esc(u)}">View</button>
+      ${self ? '' : `<button class="btn danger small" data-deluser="${esc(u)}">Delete</button>`}</div>`;
+  }).join('');
+  $('#userRows').querySelectorAll('[data-view]').forEach(b => b.onclick = () => { $('#usersModal').classList.remove('show'); openUser(b.dataset.view); });
+  $('#userRows').querySelectorAll('[data-deluser]').forEach(b => b.onclick = async () => { if (await deleteUser(b.dataset.deluser)) renderUsersModal(); });
+}
+
 async function openUser(name) {
   currentUser = name;
+  await refreshAllUsers();
   if (session.isAdmin) { localStorage.setItem('streak.view', name); $('#userSelect').value = name; }
+  $('#delUserBtn').hidden = !(session.isAdmin && name !== session.username);
   $('#welcome').classList.remove('active');
   $('#dashboard').classList.add('active');
   await load();
@@ -485,10 +709,10 @@ async function load(silent = false) {
 
 function startPolling() {
   stopPolling();
-  pollTimer = setInterval(() => load(true), 30000);
+  pollTimer = setInterval(() => { load(true); refreshAdmin(); }, 30000);
 }
 function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && currentUser && state) load(true); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && currentUser && state) { load(true); refreshAdmin(); } });
 
 function render() {
   const { username, today, habits, milestones } = state;
@@ -514,10 +738,31 @@ function render() {
 
   $('#habitCount').textContent = total ? `Your habits · ${total}` : 'Your habits';
 
+  renderChecklist(habits);
+
   const grid = $('#grid');
   grid.innerHTML = habits.map((h, i) => habitCard(h, i, today, milestones)).join('') + addCard();
   animateRings(grid);
+  requestAnimationFrame(() => grid.querySelectorAll('.next .track i').forEach(b => (b.style.width = b.dataset.w + '%')));
   bindCards();
+
+  renderGroups(state.groups || []);
+}
+
+// today's checklist widget: every habit with its status, click to toggle
+function renderChecklist(habits) {
+  const el = $('#checklist');
+  el.hidden = !habits.length;
+  if (!habits.length) return;
+  const pending = habits.filter(h => !h.doneToday);
+  el.innerHTML = `
+    <div class="cl-head"><span>Today's checklist</span>
+      <span class="pending ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending` : 'All done 🎉'}</span></div>
+    <div class="items">${habits.map(h => `
+      <button class="cl-item ${h.doneToday ? 'done' : ''}" data-cl="${h.id}" title="${h.doneToday ? 'Done — click to undo' : 'Pending — click to mark done'}">
+        <span class="dot">✓</span><span class="label">${esc(h.name)}</span>${h.currentStreak ? `<span style="opacity:.8;font-size:12px">🔥${h.currentStreak}</span>` : ''}
+      </button>`).join('')}</div>`;
+  el.querySelectorAll('[data-cl]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.cl));
 }
 
 function habitCard(h, i, today, milestones) {
@@ -528,22 +773,34 @@ function habitCard(h, i, today, milestones) {
     const dt = new Date(...d.date.split('-').map((v, k) => k === 1 ? v - 1 : +v));
     return `<div class="day"><div class="dot ${d.done ? 'on' : ''} ${d.date === today ? 'today' : ''}">${d.done ? '✓' : ''}</div>${'SMTWTFS'[dt.getDay()]}</div>`;
   }).join('');
-  const badges = milestones.map(m => `<div class="badge ${h.badges.includes(m) ? '' : 'locked'}" title="${m}-day streak · ${BADGE_NAMES[m]}">${m}</div>`).join('');
+  const earned = milestones.filter(m => h.badges.includes(m));
+  const shown = earned.slice(-4);
+  const badges = [
+    earned.length > shown.length ? `<span class="more">+${earned.length - shown.length}</span>` : '',
+    ...shown.map(m => `<div class="badge" title="${m}-day streak · ${BADGE_NAMES[m]}">${m}</div>`),
+    h.nextMilestone ? `<div class="badge locked" title="Next: ${h.nextMilestone}-day streak · ${BADGE_NAMES[h.nextMilestone]}">${h.nextMilestone}</div>` : '',
+    !earned.length ? '<span class="more">← next badge</span>' : '',
+  ].join('');
+  const toNext = h.nextMilestone ? h.nextMilestone - h.currentStreak : 0;
+  const g = h.group;
+  const gtag = g ? `<div class="gtag ${g.rank === 1 ? 'top' : ''}" title="Group challenge: ${esc(g.name)}">👥 ${esc(g.name)} · ${g.rank === 1 ? '🥇 Leading' : `#${g.rank} of ${g.size}`}</div>` : '';
   return `
   <div class="habit ${h.doneToday ? 'done' : ''}" data-id="${h.id}" style="background: linear-gradient(135deg, ${c1}, ${c2}); animation-delay:${i * 50}ms">
     <div class="head">
-      <h4 class="name">${esc(h.name)}</h4>
+      <div><h4 class="name">${esc(h.name)}</h4>${gtag}</div>
       <button class="del" data-del="${h.id}" title="Delete habit">✕</button>
     </div>
     <div class="body">
-      <div class="ring">${ringHTML(96, pct, '#fff', h.currentStreak, h.currentStreak === 1 ? 'day' : 'days')}</div>
+      <div class="ring">${ringHTML(88, pct, '#fff', h.currentStreak, h.currentStreak === 1 ? 'day' : 'day streak')}</div>
       <div class="stats">
-        <div class="stat"><b>${h.currentStreak}</b><span>🔥 Current</span></div>
-        <div class="stat"><b>${h.longestStreak}</b><span>🏆 Longest</span></div>
-        <div class="stat" style="grid-column: 1 / -1"><b>${h.totalCompletions}</b><span>✅ Total days</span></div>
+        <div class="stat"><i>🏆</i><b>${h.longestStreak}</b><span>Longest</span></div>
+        <div class="stat"><i>✅</i><b>${h.totalCompletions}</b><span>Total days</span></div>
       </div>
     </div>
-    <div class="next">${h.nextMilestone ? `${h.nextMilestone - h.currentStreak} more day${h.nextMilestone - h.currentStreak === 1 ? '' : 's'} to the ${h.nextMilestone}-day badge` : '👑 You\'ve earned every badge!'}</div>
+    <div class="next">
+      <div class="track"><i data-w="${Math.round(pct * 100)}"></i></div>
+      <div class="row"><span>${h.nextMilestone ? `${toNext} day${toNext === 1 ? '' : 's'} to ${BADGE_NAMES[h.nextMilestone]}` : '👑 All badges earned'}</span><span>${h.nextMilestone ? `${h.currentStreak}/${h.nextMilestone}` : ''}</span></div>
+    </div>
     <div class="week">${week}</div>
     <div class="badges">${badges}</div>
     <button class="check ${h.doneToday ? 'done' : ''}" data-toggle="${h.id}">
@@ -565,7 +822,7 @@ function addCard() {
 }
 
 function bindCards() {
-  document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.toggle, b));
+  document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.toggle));
   document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteHabit(+b.dataset.del));
   document.querySelectorAll('[data-suggest]').forEach(b => b.onclick = () => { $('#addInput').value = b.dataset.suggest; $('#addInput').focus(); });
   $('#addForm').onsubmit = async e => {
@@ -580,10 +837,10 @@ function bindCards() {
   };
 }
 
-async function toggleHabit(id, btn) {
-  const card = btn.closest('.habit');
+async function toggleHabit(id) {
+  const btn = document.querySelector(`[data-toggle="${id}"]`);
   const wasDone = state.habits[id].doneToday;
-  btn.disabled = true;
+  if (btn) btn.disabled = true;
   try {
     const data = await api(`/api/users/${encodeURIComponent(currentUser)}/habits/${id}/toggle`, { method: 'POST', body: JSON.stringify({}) });
     const { changed, ...view } = data;
@@ -594,16 +851,21 @@ async function toggleHabit(id, btn) {
       newCard.classList.add('celebrate');
       burst(newCard, 24);
       const h = state.habits[id];
+      const allDone = state.habits.every(x => x.doneToday);
       if (changed.newBadges.length) {
         changed.newBadges.forEach(m => { const el = [...newCard.querySelectorAll('.badge')].find(b => b.textContent == m); if (el) el.classList.add('new'); });
+        playSound('badge');
         celebrate(h.name, Math.max(...changed.newBadges));
       } else {
+        playSound(allDone ? 'all' : 'done');
         toast(`🔥 ${h.name}: ${h.currentStreak}-day streak!`, 'success');
+        if (allDone && state.habits.length > 1) confettiRain(80);
       }
     } else {
+      playSound('undo');
       toast('Unmarked for today');
     }
-  } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
+  } catch (err) { toast(err.message, 'error'); if (btn) btn.disabled = false; }
 }
 
 async function deleteHabit(id) {
@@ -624,6 +886,7 @@ $('#completeAll').onclick = async () => {
     state = view;
     render();
     document.querySelectorAll('.habit').forEach((c, i) => setTimeout(() => { c.classList.add('celebrate'); burst(c, 14); }, i * 80));
+    playSound(newBadges.length ? 'badge' : 'all');
     if (newBadges.length) {
       const top = newBadges.reduce((a, b) => (b.badge > a.badge ? b : a));
       newBadges.forEach(({ id, badge }) => { const el = [...document.querySelectorAll(`.habit[data-id="${id}"] .badge`)].find(b => b.textContent == badge); if (el) el.classList.add('new'); });
@@ -634,8 +897,6 @@ $('#completeAll').onclick = async () => {
     }
   } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
 };
-
-$('#refreshBtn').onclick = async () => { await load(); if (session.isAdmin) refreshUserSelect(); toast('Refreshed'); };
 
 $('#exportBtn').onclick = async () => {
   try {
@@ -658,7 +919,7 @@ $('#importFile').onchange = async e => {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     toast(`Imported ${data.users.length} user sheet(s)`, 'success');
-    await refreshUserSelect();
+    await refreshAdmin();
     await openUser(data.users.includes(currentUser) ? currentUser : session.username);
   } catch (err) { toast(err.message, 'error'); }
 };
@@ -684,6 +945,112 @@ $('#pwForm').onsubmit = async e => {
     if (res.token) saveSession({ ...session, token: res.token });
     $('#pwModal').classList.remove('show');
     toast(currentUser === session.username ? 'Password changed' : `Password reset for ${currentUser}`, 'success');
+  } catch (err) { toast(err.message, 'error'); }
+};
+
+// ============================================================
+//  Group challenges
+// ============================================================
+function renderGroups(groups) {
+  const el = $('#groups');
+  $('#groupCount').textContent = groups.length ? `👥 Group challenges · ${groups.length}` : '👥 Group challenges';
+  if (!groups.length) {
+    el.innerHTML = `<div class="group-empty"><h4>Compete with friends 🏁</h4>
+      <p>Start a group challenge: pick a habit, add members, and everyone keeps their own streak. Highest streak takes the crown.</p>
+      <button class="btn primary small" id="newGroupBtn2">+ Start a challenge</button></div>`;
+    $('#newGroupBtn2').onclick = openGroupModal;
+    return;
+  }
+  const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `<span class="num">#${r}</span>`;
+  el.innerHTML = groups.map((g, gi) => {
+    const canManage = session.isAdmin || g.owner === currentUser;
+    const others = allUsers.filter(u => !g.members.some(m => m.toLowerCase() === u.toLowerCase()));
+    return `<div class="group" style="animation-delay:${gi * 60}ms">
+      <div class="g-head">
+        <div><h4>${esc(g.name)}</h4><span class="g-habit">${esc(g.habit)}</span></div>
+        <div class="g-actions">
+          ${g.members.some(m => m === currentUser) && g.members.length > 1 ? `<button data-leave="${g.id}" title="Leave group">🚪</button>` : ''}
+          ${canManage ? `<button data-delgroup="${g.id}" title="Delete group">✕</button>` : ''}
+        </div>
+      </div>
+      <div class="board">${g.board.map(r => {
+        const [c1, c2] = hashColor(r.username);
+        return `<div class="row ${r.username === currentUser ? 'me' : ''} ${r.rank === 1 && r.currentStreak > 0 ? 'first' : ''}">
+          <div class="rank">${medal(r.rank)}</div>
+          <div class="av" style="background:linear-gradient(135deg,${c1},${c2})">${esc(r.username[0].toUpperCase())}</div>
+          <div class="nm">${esc(r.username)}${r.username === g.owner ? ' <small title="Group owner">👑</small>' : ''}${!r.hasHabit ? ' <small>(habit removed)</small>' : ''}</div>
+          <div class="fire">🔥 ${r.currentStreak} <small>best ${r.longestStreak}</small></div>
+          <div class="td ${r.doneToday ? 'on' : ''}" title="${r.doneToday ? 'Done today' : 'Not yet today'}">✓</div>
+        </div>`;
+      }).join('')}</div>
+      ${canManage && others.length ? `<div class="g-foot"><select data-addsel="${g.id}"><option value="">Add a member…</option>${others.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('')}</select><button class="btn primary small" data-add="${g.id}">Add</button></div>` : ''}
+      ${canManage && g.members.length > 1 ? `<div class="g-foot" style="flex-wrap:wrap;gap:6px">${g.members.filter(m => m !== currentUser).map(m => `<button class="btn ghost small" data-kick="${g.id}" data-user="${esc(m)}" title="Remove ${esc(m)}">✕ ${esc(m)}</button>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('[data-add]').forEach(b => b.onclick = async () => {
+    const sel = el.querySelector(`[data-addsel="${b.dataset.add}"]`);
+    if (!sel.value) return toast('Pick a member first', 'error');
+    try {
+      await api(`/api/groups/${b.dataset.add}/members`, { method: 'POST', body: JSON.stringify({ username: sel.value }) });
+      toast(`${sel.value} joined the challenge`, 'success');
+      await load();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+  el.querySelectorAll('[data-kick]').forEach(b => b.onclick = async () => {
+    if (!confirm(`Remove ${b.dataset.user} from this group? Their habit and history stay on their board.`)) return;
+    try {
+      await api(`/api/groups/${b.dataset.kick}/members/${encodeURIComponent(b.dataset.user)}`, { method: 'DELETE' });
+      toast(`${b.dataset.user} removed`);
+      await load();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+  el.querySelectorAll('[data-leave]').forEach(b => b.onclick = async () => {
+    if (!confirm('Leave this group? Your habit and streak stay on your board.')) return;
+    try {
+      await api(`/api/groups/${b.dataset.leave}/members/${encodeURIComponent(currentUser)}`, { method: 'DELETE' });
+      toast('You left the group');
+      await load();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+  el.querySelectorAll('[data-delgroup]').forEach(b => b.onclick = async () => {
+    if (!confirm('Delete this group for everyone? Members keep their habits.')) return;
+    try {
+      await api(`/api/groups/${b.dataset.delgroup}`, { method: 'DELETE' });
+      toast('Group deleted');
+      await load();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+}
+
+let allUsers = [];
+async function refreshAllUsers() {
+  try { allUsers = (await api('/api/users')).users; } catch { /* keep old list */ }
+}
+
+async function openGroupModal() {
+  await refreshAllUsers();
+  $('#groupForm').reset();
+  $('#gHabitList').innerHTML = (state ? state.habits.map(h => `<option value="${esc(h.name)}">`) : []).join('') + SUGGESTIONS.map(s => `<option value="${esc(s)}">`).join('');
+  const others = allUsers.filter(u => u !== currentUser);
+  $('#gMembers').innerHTML = others.length
+    ? others.map(u => `<label><input type="checkbox" value="${esc(u)}"><span>👤 ${esc(u)}</span></label>`).join('')
+    : '<div class="hint">No other users yet — you can add members later once they sign up.</div>';
+  $('#groupModal').classList.add('show');
+  $('#gName').focus();
+}
+$('#newGroupBtn').onclick = openGroupModal;
+$('#gCancel').onclick = () => $('#groupModal').classList.remove('show');
+$('#groupForm').onsubmit = async e => {
+  e.preventDefault();
+  const name = $('#gName').value.trim(), habit = $('#gHabit').value.trim();
+  const members = [...$('#gMembers').querySelectorAll('input:checked')].map(i => i.value);
+  try {
+    state = await api(`/api/users/${encodeURIComponent(currentUser)}/groups`, { method: 'POST', body: JSON.stringify({ name, habit, members }) });
+    $('#groupModal').classList.remove('show');
+    render();
+    playSound('badge');
+    toast(`🏁 "${name}" started with ${members.length + 1} member${members.length ? 's' : ''}`, 'success');
+    confettiRain(60);
   } catch (err) { toast(err.message, 'error'); }
 };
 
