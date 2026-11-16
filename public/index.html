@@ -115,15 +115,22 @@
   .hero .complete-all:hover { transform: translateY(-3px) scale(1.02); }
   .hero .complete-all.done { background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 12px 30px rgba(108,92,231,.35); }
 
+  /* ---------- scrollbars (visible on light + gradient backgrounds) ---------- */
+  * { scrollbar-width: thin; scrollbar-color: #6c5ce7 rgba(108,92,231,.15); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: rgba(108,92,231,.12); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #6c5ce7, #a29bfe); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: #5a4bd1; background-clip: padding-box; }
+  html { scrollbar-color: #6c5ce7 rgba(45,42,74,.25); }
+  html::-webkit-scrollbar-track { background: rgba(45,42,74,.25); }
+
   /* ---------- today checklist (inside hero) ---------- */
   .checklist { grid-column: 1 / -1; border-top: 2px dashed #ece9ff; padding-top: 16px; }
   .cl-tile { border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; background: #f7f6ff; border: 2px solid #ece9ff; }
   .cl-tile .cl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
   .cl-tile .cl-head .count { font-size: 12px; font-weight: 900; border-radius: 999px; padding: 3px 10px; background: #e17055; color: #fff; letter-spacing: 0; text-transform: none; white-space: nowrap; }
   .cl-tile .cl-head .count.zero { background: #00b894; }
-  .cl-tile .items { display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; padding: 2px 4px 6px 2px; scrollbar-width: thin; scrollbar-color: #c7c0ff transparent; }
-  .cl-tile .items::-webkit-scrollbar { width: 6px; }
-  .cl-tile .items::-webkit-scrollbar-thumb { background: #c7c0ff; border-radius: 99px; }
+  .cl-tile .items { display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; padding: 2px 8px 6px 2px; }
   .cl-tile .items.scrolls { mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); }
   .cl-tile .progress { height: 6px; border-radius: 99px; background: rgba(108,92,231,.12); overflow: hidden; }
   .cl-tile .progress i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #6c5ce7, #00b894); transition: width .8s cubic-bezier(.2,1,.3,1); }
@@ -192,6 +199,30 @@
   .week .dot { width: 100%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.25); margin: 0 auto 2px; border: 2px solid transparent; display: grid; place-items: center; font-size: 10px; }
   .week .dot.on { background: #fff; color: #2d2a4a; }
   .week .dot.today { border-color: #fff; }
+  .habit .sched { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; margin-right: 4px; font-size: 11px; font-weight: 800; background: rgba(0,0,0,.18); color: #fff; border-radius: 999px; padding: 2px 9px; cursor: pointer; }
+  .habit .sched:hover { background: rgba(0,0,0,.3); }
+
+  /* ---------- schedule picker ---------- */
+  .sched-pick { display: flex; flex-direction: column; gap: 8px; }
+  .sched-pick .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sched-pick .presets button { background: #fff; border: 2px solid #ece9ff; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 800; color: var(--muted); }
+  .sched-pick .presets button.on { background: linear-gradient(135deg, #6c5ce7, #a29bfe); border-color: transparent; color: #fff; }
+  .sched-pick .days { display: flex; gap: 5px; }
+  .sched-pick .days button { flex: 1; aspect-ratio: 1; max-width: 40px; border-radius: 50%; background: #fff; border: 2px solid #ece9ff; font-size: 11px; font-weight: 900; color: var(--muted); }
+  .sched-pick .days button.on { background: #00b894; border-color: #00b894; color: #fff; }
+  .sched-pick .days[hidden] { display: none; }
+
+  /* ---------- color picker ---------- */
+  .color-pick { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+  .color-pick button { width: 28px; height: 28px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: transform .15s; position: relative; }
+  .color-pick button:hover { transform: scale(1.12); }
+  .color-pick button.on { transform: scale(1.15); box-shadow: 0 0 0 2.5px #2d2a4a, 0 2px 8px rgba(0,0,0,.18); }
+  .color-pick button.on::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 900; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .color-pick .auto { background: conic-gradient(#ff6b6b, #fdcb6e, #00b894, #0984e3, #6c5ce7, #e84393, #ff6b6b); }
+  .pick-label { font-size: 11px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: -4px; }
+  .habit .edit { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; font-size: 13px; display: grid; place-items: center; flex-shrink: 0; }
+  .habit .edit:hover { background: rgba(0,0,0,.25); }
+  .habit .head .acts { display: flex; gap: 6px; }
 
   .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; padding-top: 10px; min-height: 34px; align-items: center; }
   .badge {
@@ -227,6 +258,18 @@
   .add-card h4 { margin: 0; font-size: 16px; font-weight: 900; }
   .add-card input { padding: 13px 16px; border-radius: 14px; border: 2px solid #fff; font-family: inherit; font-size: 15px; font-weight: 700; outline: none; background: #fff; }
   .add-card input:focus { border-color: #6c5ce7; }
+  .add-card.flash { animation: addFlash 1.2s ease; }
+  @keyframes addFlash { 0%,100%{ box-shadow: none } 30%{ box-shadow: 0 0 0 6px rgba(255,255,255,.9), 0 0 40px rgba(108,92,231,.6) } }
+
+  /* ---------- floating quick actions ---------- */
+  .fab { position: fixed; right: 22px; bottom: 22px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .fab .main { width: 58px; height: 58px; border-radius: 50%; font-size: 28px; color: #fff; background: linear-gradient(135deg, #6c5ce7, #a29bfe); box-shadow: 0 12px 30px rgba(108,92,231,.45); display: grid; place-items: center; transition: transform .2s; }
+  .fab.open .main { transform: rotate(45deg); }
+  .fab .menu { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .fab .menu button { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #fff; color: var(--ink); font-weight: 900; font-size: 14px; box-shadow: 0 8px 24px rgba(45,42,74,.2); transform: translateY(10px); opacity: 0; pointer-events: none; transition: all .2s; }
+  .fab.open .menu button { transform: none; opacity: 1; pointer-events: auto; }
+  .fab.open .menu button:nth-child(2) { transition-delay: .05s; }
+  .section-title .quick { display: flex; gap: 8px; }
   .suggest { display: flex; flex-wrap: wrap; gap: 6px; }
   .suggest button { background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 800; color: var(--muted); }
   .suggest button:hover { color: #6c5ce7; }
@@ -374,6 +417,10 @@
 
     <div class="section-title">
       <h3 id="habitCount">Your habits</h3>
+      <div class="quick">
+        <button class="btn small" id="quickAdd">➕ Add habit</button>
+        <button class="btn small" id="quickGroup">👥 New group</button>
+      </div>
     </div>
     <div id="grid" class="grid"></div>
 
@@ -422,12 +469,35 @@
     </div>
   </form>
 </div>
+<div id="editModal" class="modal">
+  <form class="modal-card form" id="editForm" autocomplete="off">
+    <h3>✏️ Edit habit</h3>
+    <input id="editName" placeholder="Habit name" maxlength="60" required>
+    <div class="hint" id="editNameHint" hidden>Shared in a group challenge — the name can't be changed.</div>
+    <div class="pick-label">Color</div>
+    <div id="editColor" style="margin-bottom:10px"></div>
+    <div class="pick-label">Schedule</div>
+    <div id="editSched"></div>
+    <div class="hint" style="margin-top:8px">Unscheduled days never break the streak.</div>
+    <div class="row">
+      <button class="btn ghost" type="button" id="editCancel">Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</div>
 <div id="usersModal" class="modal">
   <div class="modal-card form">
     <h3>👥 Manage users</h3>
     <div class="user-rows" id="userRows"></div>
     <div class="row"><button class="btn ghost" type="button" id="usersClose">Close</button></div>
   </div>
+</div>
+<div class="fab" id="fab" hidden>
+  <div class="menu">
+    <button type="button" id="fabAdd">➕ Add habit</button>
+    <button type="button" id="fabGroup">👥 New group</button>
+  </div>
+  <button type="button" class="main" id="fabMain" title="Quick actions">+</button>
 </div>
 <canvas id="confetti"></canvas>
 
@@ -448,6 +518,72 @@ const MOTIVATION = {
 };
 const BADGE_NAMES = { 1: 'First Step', 3: 'Getting Going', 7: 'One Week', 14: 'Two Weeks', 30: 'One Month', 50: 'Fifty Club', 75: 'Seventy-Five', 100: 'Century', 150: 'Unstoppable', 200: 'Two Hundred', 250: 'Iron Will', 300: 'Three Hundred', 365: 'Full Year' };
 const SUGGESTIONS = ['🏃 Exercise', '🌅 Wake up early', '📖 Read 10 pages', '💧 Drink 2L water', '🧘 Meditate', '✍️ Journal', '🚭 No junk food', '😴 Sleep by 11'];
+const DAY_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const PRESETS = { daily: null, weekdays: [1, 2, 3, 4, 5], weekends: [0, 6] };
+const sameDays = (a, b) => JSON.stringify(a || null) === JSON.stringify(b || null);
+function presetOf(days) { return Object.keys(PRESETS).find(k => sameDays(PRESETS[k], days)) || 'custom'; }
+function scheduleLabel(days) {
+  const p = presetOf(days);
+  if (p === 'daily') return 'Every day';
+  if (p === 'weekdays') return 'Weekdays';
+  if (p === 'weekends') return 'Weekends';
+  return days.map(d => DAY_NAMES[d]).join(' · ');
+}
+// schedule picker: presets + per-day toggles; reads/writes `days` (null = daily) via data attribute
+function schedulePickerHTML(days) {
+  const p = presetOf(days);
+  const sel = days || [0, 1, 2, 3, 4, 5, 6];
+  return `<div class="sched-pick" data-days="${days ? days.join(',') : ''}">
+    <div class="presets">${['daily', 'weekdays', 'weekends', 'custom'].map(k => `<button type="button" data-preset="${k}" class="${p === k ? 'on' : ''}">${{ daily: '📅 Daily', weekdays: '💼 Weekdays', weekends: '🌴 Weekends', custom: '🎛 Custom' }[k]}</button>`).join('')}</div>
+    <div class="days" ${p === 'custom' ? '' : 'hidden'}>${DAY_SHORT.map((d, i) => `<button type="button" data-day="${i}" class="${sel.includes(i) ? 'on' : ''}">${d}</button>`).join('')}</div>
+  </div>`;
+}
+function bindSchedulePicker(root) {
+  const pick = root.querySelector('.sched-pick');
+  const daysEl = pick.querySelector('.days');
+  const setDays = days => { pick.dataset.days = days ? (days.length ? days.join(',') : 'none') : ''; };
+  pick.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
+    pick.querySelectorAll('[data-preset]').forEach(x => x.classList.toggle('on', x === b));
+    const k = b.dataset.preset;
+    daysEl.hidden = k !== 'custom';
+    if (k !== 'custom') {
+      setDays(PRESETS[k]);
+      const sel = PRESETS[k] || [0, 1, 2, 3, 4, 5, 6];
+      daysEl.querySelectorAll('[data-day]').forEach(d => d.classList.toggle('on', sel.includes(+d.dataset.day)));
+    } else setDays(readDays());
+  });
+  const readDays = () => { const on = [...daysEl.querySelectorAll('[data-day].on')].map(d => +d.dataset.day); return on.length === 7 ? null : on; };
+  daysEl.querySelectorAll('[data-day]').forEach(d => d.onclick = () => { d.classList.toggle('on'); setDays(readDays()); });
+}
+function pickerDays(root) {
+  const v = root.querySelector('.sched-pick').dataset.days;
+  return v === 'none' ? [] : v ? v.split(',').map(Number) : null;
+}
+// color picker: palette swatches (first color of each gradient pair) + "auto"
+function paletteFor(color, i) {
+  if (!color) return PALETTES[i % PALETTES.length];
+  return PALETTES.find(([c1]) => c1.toLowerCase() === color.toLowerCase()) || [color, shade(color, 40)];
+}
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = c => Math.max(0, Math.min(255, c + amt));
+  return '#' + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map(c => c.toString(16).padStart(2, '0')).join('');
+}
+function colorPickerHTML(color) {
+  return `<div class="color-pick" data-color="${color || ''}">
+    <button type="button" class="auto ${color ? '' : 'on'}" data-color-opt="" title="Auto"></button>
+    ${PALETTES.map(([c1, c2]) => `<button type="button" data-color-opt="${c1}" class="${color && color.toLowerCase() === c1.toLowerCase() ? 'on' : ''}" style="background:linear-gradient(135deg, ${c1}, ${c2})" title="${c1}"></button>`).join('')}
+  </div>`;
+}
+function bindColorPicker(root) {
+  const pick = root.querySelector('.color-pick');
+  pick.querySelectorAll('[data-color-opt]').forEach(b => b.onclick = () => {
+    pick.querySelectorAll('[data-color-opt]').forEach(x => x.classList.toggle('on', x === b));
+    pick.dataset.color = b.dataset.colorOpt;
+  });
+}
+const pickerColor = root => root.querySelector('.color-pick').dataset.color || null;
 
 let session = JSON.parse(localStorage.getItem('streak.session') || 'null'); // { token, username, isAdmin }
 let currentUser = null; // whose dashboard is shown (admin may view others)
@@ -566,6 +702,7 @@ async function showWelcome() {
   stopPolling();
   $('#dashboard').classList.remove('active');
   $('#welcome').classList.add('active');
+  $('#fab').hidden = true;
   setAuthMode('login');
   const chips = $('#userChips');
   chips.innerHTML = '';
@@ -701,6 +838,7 @@ async function openUser(name) {
   $('#delUserBtn').hidden = !(session.isAdmin && name !== session.username);
   $('#welcome').classList.remove('active');
   $('#dashboard').classList.add('active');
+  $('#fab').hidden = false;
   await load();
   startPolling();
 }
@@ -732,26 +870,28 @@ function render() {
   $('#userName').innerHTML = esc(username) + (session.isAdmin && username === session.username ? '<span class="admin-tag">ADMIN</span>' : '');
   $('#todayLabel').textContent = fmtDate(today) + (username !== session.username ? ` · viewing as ${session.username}` : '');
 
-  const total = habits.length, done = habits.filter(h => h.doneToday).length;
-  $('#todayRing').innerHTML = ringHTML(120, total ? done / total : 0, 'url(#g)', `${done}/${total}`, 'today');
+  // today's targets = habits scheduled for today
+  const dueToday = habits.filter(h => h.scheduledToday !== false);
+  const total = dueToday.length, done = dueToday.filter(h => h.doneToday).length;
+  $('#todayRing').innerHTML = ringHTML(120, total ? done / total : (habits.length ? 1 : 0), 'url(#g)', `${done}/${total}`, 'today');
   $('#todayRing svg').insertAdjacentHTML('afterbegin', `<defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#00b894"/></linearGradient></defs>`);
 
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   $('#greeting').textContent = `${greet}, ${username}!`;
-  $('#motivation').textContent = !total ? pick(MOTIVATION.none) : done === 0 ? pick(MOTIVATION.zero) : done < total ? pick(MOTIVATION.partial) : pick(MOTIVATION.all);
+  $('#motivation').textContent = !habits.length ? pick(MOTIVATION.none) : !total ? 'Nothing scheduled for today.' : done === 0 ? pick(MOTIVATION.zero) : done < total ? pick(MOTIVATION.partial) : pick(MOTIVATION.all);
 
   const allBtn = $('#completeAll');
   allBtn.disabled = !total;
   allBtn.classList.toggle('done', total > 0 && done === total);
   allBtn.innerHTML = total && done === total ? '🏆 All done for today!' : `✨ Complete all for today${total ? ` (${total - done} left)` : ''}`;
 
-  $('#habitCount').textContent = total ? `Your habits · ${total}` : 'Your habits';
+  $('#habitCount').textContent = habits.length ? `Your habits · ${habits.length}` : 'Your habits';
 
   renderChecklist(habits);
 
   const grid = $('#grid');
-  grid.innerHTML = habits.map((h, i) => habitCard(h, i, today, milestones)).join('') + addCard();
+  grid.innerHTML = addCard() + habits.map((h, i) => habitCard(h, i, today, milestones)).join('');
   animateRings(grid);
   requestAnimationFrame(() => grid.querySelectorAll('.next .track i').forEach(b => (b.style.width = b.dataset.w + '%')));
   bindCards();
@@ -762,17 +902,19 @@ function render() {
 // today's checklist: every habit with today's status (pending first); click a chip to toggle quietly (no popup)
 function renderChecklist(habits) {
   const el = $('#checklist');
-  el.hidden = !habits.length;
-  if (!habits.length) return;
-  const pending = habits.filter(h => !h.doneToday), done = habits.filter(h => h.doneToday);
+  // only habits scheduled for today (plus anything already ticked today)
+  const shown = habits.filter(h => h.scheduledToday !== false || h.doneToday);
+  el.hidden = !shown.length;
+  if (!shown.length) return;
+  const pending = shown.filter(h => !h.doneToday), done = shown.filter(h => h.doneToday);
   const item = h => `
       <button class="cl-item ${h.doneToday ? 'done' : ''}" data-cl="${h.id}" title="${h.doneToday ? 'Done — click to undo' : 'Pending — click to mark done'}">
         <span class="dot">✓</span><span class="label">${esc(h.name)}</span>${h.currentStreak ? `<span class="streak">🔥${h.currentStreak}</span>` : ''}
       </button>`;
   el.innerHTML = `
     <div class="cl-tile">
-      <div class="cl-head"><span>📋 Today's habits</span><span class="count ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending · ${done.length}/${habits.length} done` : `All ${habits.length} done 🏆`}</span></div>
-      <div class="progress"><i data-w="${Math.round(done.length / habits.length * 100)}"></i></div>
+      <div class="cl-head"><span>📋 Today's habits</span><span class="count ${pending.length ? '' : 'zero'}">${pending.length ? `${pending.length} pending · ${done.length}/${shown.length} done` : `All ${shown.length} done 🏆`}</span></div>
+      <div class="progress"><i data-w="${Math.round(done.length / shown.length * 100)}"></i></div>
       <div class="items">${[...pending, ...done].map(item).join('')}</div>
     </div>`;
   requestAnimationFrame(() => {
@@ -783,7 +925,7 @@ function renderChecklist(habits) {
 }
 
 function habitCard(h, i, today, milestones) {
-  const [c1, c2] = PALETTES[i % PALETTES.length];
+  const [c1, c2] = paletteFor(h.color, i);
   const span = (h.nextMilestone || h.currentStreak) - h.prevMilestone;
   const pct = h.nextMilestone ? (h.currentStreak - h.prevMilestone) / span : 1;
   const week = h.history.slice(-7).map(d => {
@@ -801,11 +943,15 @@ function habitCard(h, i, today, milestones) {
   const toNext = h.nextMilestone ? h.nextMilestone - h.currentStreak : 0;
   const g = h.group;
   const gtag = g ? `<div class="gtag ${g.rank === 1 ? 'top' : ''}" title="Group challenge: ${esc(g.name)}">👥 ${esc(g.name)} · ${g.rank === 1 ? '🥇 Leading' : `#${g.rank} of ${g.size}`}</div>` : '';
+  const stag = `<button type="button" class="sched" data-sched="${h.id}" title="Change schedule">📅 ${scheduleLabel(h.days)}</button>`;
   return `
   <div class="habit ${h.doneToday ? 'done' : ''}" data-id="${h.id}" style="background: linear-gradient(135deg, ${c1}, ${c2}); animation-delay:${i * 50}ms">
     <div class="head">
-      <div><h4 class="name">${esc(h.name)}</h4>${gtag}</div>
-      <button class="del" data-del="${h.id}" title="Delete habit">✕</button>
+      <div><h4 class="name">${esc(h.name)}</h4>${stag}${gtag}</div>
+      <div class="acts">
+        <button class="edit" data-edit="${h.id}" title="Edit habit">✏️</button>
+        <button class="del" data-del="${h.id}" title="Delete habit">✕</button>
+      </div>
     </div>
     <div class="body">
       <div class="ring">${ringHTML(88, pct, '#fff', h.currentStreak, h.currentStreak === 1 ? 'day' : 'day streak')}</div>
@@ -831,9 +977,15 @@ function addCard() {
   return `
   <div class="add-card">
     <h4>➕ Add a new habit</h4>
-    <form id="addForm" autocomplete="off" style="display:flex;gap:8px">
-      <input id="addInput" placeholder="e.g. 🏃 Exercise" maxlength="60" required style="flex:1">
-      <button class="btn primary" type="submit">Add</button>
+    <form id="addForm" autocomplete="off" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:8px">
+        <input id="addInput" placeholder="e.g. 🏃 Exercise" maxlength="60" required style="flex:1;min-width:0">
+        <button class="btn primary" type="submit">Add</button>
+      </div>
+      <div class="pick-label">Color</div>
+      ${colorPickerHTML(null)}
+      <div class="pick-label">Schedule</div>
+      ${schedulePickerHTML(null)}
     </form>
     <div class="suggest">${SUGGESTIONS.map(s => `<button type="button" data-suggest="${esc(s)}">${esc(s)}</button>`).join('')}</div>
   </div>`;
@@ -843,18 +995,74 @@ function bindCards() {
   document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleHabit(+b.dataset.toggle));
   document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteHabit(+b.dataset.del));
   document.querySelectorAll('[data-break]').forEach(b => b.onclick = () => breakStreak(+b.dataset.break));
+  document.querySelectorAll('[data-sched]').forEach(b => b.onclick = () => openEditModal(+b.dataset.sched));
+  document.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEditModal(+b.dataset.edit));
   document.querySelectorAll('[data-suggest]').forEach(b => b.onclick = () => { $('#addInput').value = b.dataset.suggest; $('#addInput').focus(); });
+  bindSchedulePicker($('#addForm'));
+  bindColorPicker($('#addForm'));
   $('#addForm').onsubmit = async e => {
     e.preventDefault();
     const name = $('#addInput').value.trim();
     if (!name) return;
+    const days = pickerDays($('#addForm'));
+    if (days && !days.length) return toast('Pick at least one day', 'error');
+    const color = pickerColor($('#addForm'));
     try {
-      state = await api(`/api/users/${encodeURIComponent(currentUser)}/habits`, { method: 'POST', body: JSON.stringify({ name }) });
+      state = await api(`/api/users/${encodeURIComponent(currentUser)}/habits`, { method: 'POST', body: JSON.stringify({ name, days, color }) });
       render();
-      toast(`Added "${name}" — day one starts now!`, 'success');
+      toast(`Added "${name}" (${scheduleLabel(days)}) — day one starts now!`, 'success');
     } catch (err) { toast(err.message, 'error'); }
   };
 }
+
+// quick actions: jump to the add-habit card / open the group modal from anywhere
+function goAddHabit() {
+  const card = document.querySelector('.add-card');
+  if (!card) return;
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+  setTimeout(() => $('#addInput').focus({ preventScroll: true }), 350);
+  $('#fab').classList.remove('open');
+}
+$('#quickAdd').onclick = goAddHabit;
+$('#fabAdd').onclick = goAddHabit;
+$('#quickGroup').onclick = () => openGroupModal();
+$('#fabGroup').onclick = () => { $('#fab').classList.remove('open'); openGroupModal(); };
+$('#fabMain').onclick = e => { e.stopPropagation(); $('#fab').classList.toggle('open'); };
+document.addEventListener('click', e => { if (!$('#fab').contains(e.target)) $('#fab').classList.remove('open'); });
+
+// edit an existing habit: name, color, schedule
+let editHabitId = null;
+function openEditModal(id) {
+  const h = state.habits[id];
+  editHabitId = id;
+  $('#editName').value = h.name;
+  $('#editName').disabled = !!h.group;
+  $('#editNameHint').hidden = !h.group;
+  $('#editColor').innerHTML = colorPickerHTML(h.color);
+  bindColorPicker($('#editColor'));
+  $('#editSched').innerHTML = schedulePickerHTML(h.days);
+  bindSchedulePicker($('#editSched'));
+  $('#editModal').classList.add('show');
+  if (!h.group) { $('#editName').focus(); $('#editName').select(); }
+}
+$('#editCancel').onclick = () => $('#editModal').classList.remove('show');
+$('#editForm').onsubmit = async e => {
+  e.preventDefault();
+  const h = state.habits[editHabitId];
+  const name = $('#editName').value.trim();
+  if (!name) return toast('Habit name is required', 'error');
+  const days = pickerDays($('#editSched'));
+  if (days && !days.length) return toast('Pick at least one day', 'error');
+  const body = { days, color: pickerColor($('#editColor')) };
+  if (!h.group && name !== h.name) body.name = name;
+  try {
+    state = await api(`/api/users/${encodeURIComponent(currentUser)}/habits/${editHabitId}`, { method: 'PUT', body: JSON.stringify(body) });
+    $('#editModal').classList.remove('show');
+    render();
+    toast(`Saved "${name}"`, 'success');
+  } catch (err) { toast(err.message, 'error'); }
+};
 
 async function toggleHabit(id, { quiet = false } = {}) {
   const btn = document.querySelector(`[data-toggle="${id}"]`);

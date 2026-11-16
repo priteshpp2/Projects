@@ -149,7 +149,63 @@ async function main() {
     r = await call('GET', '/api/export', { token: admin });
     const check = new ExcelJS.Workbook();
     await check.xlsx.load(r.body);
-    assert.deepStrictEqual(check.worksheets.map(w => w.name).sort(), ['Amrita', 'Pritesh', '_auth', '_groups', '_resets'], 'workbook consistent');
+    assert.deepStrictEqual(check.worksheets.map(w => w.name).sort(), ['Amrita', 'Pritesh', '_auth', '_colors', '_groups', '_resets', '_schedules'], 'workbook consistent');
+
+    // ---- flexible schedules ----
+    r = await call('POST', '/api/login', { body: { username: 'Amrita', password: 'abc@123' } });
+    const amritaS = r.body.token;
+    r = await call('POST', '/api/users/Amrita/habits', { token: amritaS, body: { name: 'Gym', days: [] } });
+    assert.strictEqual(r.status, 400, 'empty schedule rejected');
+    r = await call('POST', '/api/users/Amrita/habits', { token: amritaS, body: { name: 'Gym', days: [0, 1, 2, 3, 4, 5, 6] } });
+    assert.strictEqual(r.status, 200);
+    let gym = r.body.habits.find(h => h.name === 'Gym');
+    assert.strictEqual(gym.days, null, 'all 7 days normalises to daily');
+    const todayS = r.body.today;
+    const wd = key => new Date(key + 'T00:00:00Z').getUTCDay();
+    const shift = (key, n) => { const x = new Date(key + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+    // schedule Gym only on today's weekday and the weekday two days ago -> yesterday is a rest day
+    const onlyDays = [...new Set([wd(todayS), wd(shift(todayS, -2))])].sort();
+    r = await call('PUT', `/api/users/Amrita/habits/${gym.id}/schedule`, { token: amritaS, body: { days: onlyDays } });
+    assert.strictEqual(r.status, 200, 'schedule updated');
+    gym = r.body.habits[gym.id];
+    assert.deepStrictEqual(gym.days, onlyDays);
+    assert.strictEqual(gym.scheduledToday, true);
+    await call('POST', `/api/users/Amrita/habits/${gym.id}/toggle`, { token: amritaS, body: { date: shift(todayS, -2) } });
+    r = await call('POST', `/api/users/Amrita/habits/${gym.id}/toggle`, { token: amritaS, body: {} });
+    assert.strictEqual(r.body.habits[gym.id].currentStreak, 2, 'rest day in between does not break the streak');
+    assert.strictEqual(r.body.habits[gym.id].longestStreak, 2, 'longest also skips rest days');
+    assert.strictEqual(r.body.habits[gym.id].history.find(d => d.date === shift(todayS, -1)).scheduled, onlyDays.includes(wd(shift(todayS, -1))), 'history carries scheduled flag');
+
+    // a habit NOT scheduled today is skipped by complete-all
+    const offDay = [((wd(todayS) + 3) % 7)];
+    r = await call('POST', '/api/users/Amrita/habits', { token: amritaS, body: { name: 'Piano', days: offDay } });
+    const piano = r.body.habits.find(h => h.name === 'Piano');
+    assert.strictEqual(piano.scheduledToday, false, 'not scheduled today');
+    r = await call('POST', '/api/users/Amrita/complete-all', { token: amritaS, body: {} });
+    assert.strictEqual(r.body.habits[piano.id].doneToday, false, 'complete-all leaves rest-day habits alone');
+    assert.ok(r.body.habits.filter(h => h.scheduledToday).every(h => h.doneToday), 'all scheduled habits done');
+    r = await call('DELETE', `/api/users/Amrita/habits/${piano.id}`, { token: amritaS });
+    assert.strictEqual(r.status, 200);
+
+    // ---- rename + color ----
+    r = await call('POST', '/api/users/Amrita/habits', { token: amritaS, body: { name: 'Swim', color: 'blue' } });
+    assert.strictEqual(r.status, 400, 'bad color rejected');
+    r = await call('POST', '/api/users/Amrita/habits', { token: amritaS, body: { name: 'Swim', color: '#0984E3', days: [1, 3] } });
+    let swim = r.body.habits.find(h => h.name === 'Swim');
+    assert.strictEqual(swim.color, '#0984e3', 'color stored (lowercased)');
+    await call('POST', `/api/users/Amrita/habits/${swim.id}/toggle`, { token: amritaS, body: {} });
+    r = await call('PUT', `/api/users/Amrita/habits/${swim.id}`, { token: amritaS, body: { name: 'Gym' } });
+    assert.strictEqual(r.status, 409, 'rename to existing name rejected');
+    r = await call('PUT', `/api/users/Amrita/habits/${swim.id}`, { token: amritaS, body: { name: 'Swimming', color: '#e84393' } });
+    assert.strictEqual(r.status, 200, 'renamed');
+    swim = r.body.habits[swim.id];
+    assert.strictEqual(swim.name, 'Swimming');
+    assert.strictEqual(swim.color, '#e84393', 'color updated');
+    assert.deepStrictEqual(swim.days, [1, 3], 'schedule carried over on rename');
+    assert.strictEqual(swim.doneToday, true, 'completions carried over on rename');
+    assert.ok(!r.body.habits.some(h => h.name === 'Swim'), 'old name gone');
+    r = await call('PUT', `/api/users/Amrita/habits/${swim.id}`, { token: amritaS, body: { color: null } });
+    assert.strictEqual(r.body.habits[swim.id].color, null, 'color cleared -> auto');
 
     // ---- break streak ----
     r = await call('POST', '/api/login', { body: { username: 'Amrita', password: 'abc@123' } });
